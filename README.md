@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tempo: Intent-Driven Support for ADHD
 
-## Getting Started
+Tempo is an AI-powered digital therapeutic tool designed specifically for the ADHD brain. Unlike traditional productivity apps that rely on high-friction data entry and guilt-based gamification, Tempo uses an intent-driven interface to lower cognitive load. 
 
-First, run the development server:
+It leverages high-speed, cost-efficient Large Language Models (LLMs) to address three core pillars of ADHD struggles: Rejection Sensitive Dysphoria (RSD), executive dysfunction (task paralysis), and social/emotional burnout.
 
+## Core Features
+
+- **🧩 Task Chunker (Executive Dysfunction)**: Uses DeepSeek to break down broad, overwhelming tasks into 3-5 highly actionable, immediate physical micro-steps.
+- **🛡️ Communication Buffer (RSD)**: Analyzes emotionally charged messages (received or drafted) using DeepSeek CBT protocols to extract an emotionally neutral translation and flag cognitive distortions.
+- **🎙️ Safe Venting Space (Emotional Burnout)**: A voice-first journal using Gemini Multimodal AI. It provides a judgment-free zone to vent, offering short, validating responses without unsolicited advice.
+
+## Architecture & Tech Stack
+
+Tempo is built with a highly efficient, serverless architecture optimized for a solo builder:
+- **Framework**: [Next.js (App Router)](https://nextjs.org/)
+- **Styling**: Vanilla CSS with premium glassmorphism aesthetics.
+- **AI Models**: [DeepSeek](https://deepseek.com) (Text/Reasoning) and [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/) (Multimodal Audio).
+- **Backend**: Native Next.js API Routes (Serverless Functions) integrated with `maxDuration` scaling.
+- **Database / Auth**: [Supabase](https://supabase.com/) (Scaffolded and ready for expansion).
+
+## Getting Started Locally
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/haresham15/TempoADHDAssist.git
+cd TempoADHDAssist
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Variables
+Create a `.env.local` file in the root directory and add the following keys:
+```env
+# AI Models
+DEEPSEEK_API_KEY=your_deepseek_api_key
+GEMINI_API_KEY=your_gemini_api_key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Supabase (Optional for V1 MVP, required for Auth/DB features)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-## Learn More
+### 4. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) with your browser to interact with the app.
 
-To learn more about Next.js, take a look at the following resources:
+## Production Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is optimized for deployment on Vercel's free tier. 
+1. Push your code to GitHub.
+2. Import the repository in your Vercel Dashboard.
+3. Paste the environment variables from your `.env.local` file into Vercel's Environment Variables settings.
+4. Deploy! 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Note: The API routes (`/api/chunk-task`, `/api/rsd-buffer`, `/api/vent`) are configured with `export const maxDuration = 60;` to ensure AI requests do not timeout under Vercel's default 10-15s serverless limits.*
