@@ -76,7 +76,7 @@
   border-radius: 50%;
   background: var(--module-blush);
   border: none;
-  color: white;
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;

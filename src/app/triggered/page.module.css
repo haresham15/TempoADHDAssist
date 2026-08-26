@@ -100,7 +100,7 @@
 
 .submitBtn {
   background-color: var(--module-lavender);
-  color: white;
+  color: var(--text-primary);
   border: none;
   border-radius: 999px; /* Pill */
   padding: 0.9rem 2.5rem;

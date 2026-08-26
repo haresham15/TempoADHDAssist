@@ -75,7 +75,7 @@
 
 .submitBtn {
   background-color: var(--primary-sage);
-  color: white;
+  color: var(--text-primary);
   border: none;
   border-radius: 999px; /* Pill */
   padding: 0.8rem 2rem;
@@ -156,7 +156,7 @@
 }
 
 .checkIcon {
-  color: white;
+  color: var(--text-primary);
   width: 14px;
   height: 14px;
   animation: drawCheck 0.25s ease-out forwards;
