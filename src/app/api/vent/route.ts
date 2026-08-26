@@ -11,10 +11,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Audio data is required" }, { status: 400 });
     }
 
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY_TEMPO;
 
     if (!GEMINI_API_KEY) {
-      console.error("Missing GEMINI_API_KEY environment variable");
+      console.error("Missing GEMINI_API_KEY_TEMPO environment variable");
       return NextResponse.json({ 
         reply: "I hear you. That sounds really exhausting. It's completely understandable that you feel this way right now. Please take a deep breath; you are doing your best."
       });

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
+import { parseJsonFromLLM } from "@/lib/utils";
 
 export const maxDuration = 60; // Allow up to 60s for Vercel Serverless Function
 
@@ -70,7 +72,22 @@ export async function POST(req: Request) {
     
     try {
       const content = data.choices[0].message.content;
-      result = JSON.parse(content);
+      result = parseJsonFromLLM(content);
+      
+      // Save to Supabase
+      if (result.neutralTranslation) {
+        const { error: dbError } = await supabase
+          .from("rsd_logs")
+          .insert([{ 
+            original_message: message, 
+            neutral_translation: result.neutralTranslation, 
+            distortions: result.distortions || [] 
+          }]);
+          
+        if (dbError) {
+          console.error("Failed to save to Supabase:", dbError);
+        }
+      }
     } catch (e) {
       console.error("Failed to parse LLM response as JSON:", e);
       result.neutralTranslation = "An error occurred while parsing the response. Please try again.";

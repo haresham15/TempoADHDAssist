@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
+import { parseJsonFromLLM } from "@/lib/utils";
 
 export const maxDuration = 60; // Allow up to 60s for Vercel Serverless Function
 
@@ -59,13 +61,24 @@ export async function POST(req: Request) {
     
     try {
       const content = data.choices[0].message.content;
-      const parsed = JSON.parse(content);
+      const parsed = parseJsonFromLLM(content);
       if (Array.isArray(parsed)) {
         steps = parsed;
       } else if (parsed.steps && Array.isArray(parsed.steps)) {
         steps = parsed.steps;
       } else {
         steps = Object.values(parsed).find(v => Array.isArray(v)) || [];
+      }
+      
+      // Save to Supabase
+      if (steps.length > 0) {
+        const { error: dbError } = await supabase
+          .from("task_chunks")
+          .insert([{ original_task: task, steps }]);
+          
+        if (dbError) {
+          console.error("Failed to save to Supabase:", dbError);
+        }
       }
     } catch (e) {
       console.error("Failed to parse LLM response as JSON:", e);
