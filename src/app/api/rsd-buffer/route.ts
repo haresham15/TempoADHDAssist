@@ -60,7 +60,7 @@ Respond in JSON format with exactly two keys:
     }
 
     const data = await response.json();
-    let result = {
+    const result = {
       emotion: "",
       translation: ""
     };

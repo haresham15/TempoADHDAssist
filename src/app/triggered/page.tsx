@@ -35,8 +35,12 @@ export default function Triggered() {
 
       const data = await response.json();
       setResult(data);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "An unexpected error occurred.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -88,7 +92,7 @@ export default function Triggered() {
         <section className={styles.resultSection}>
           <div className={styles.cardsWrapper}>
             <div className={`${styles.resultCard} ${styles.emotionCard}`}>
-              <h3>What you're feeling</h3>
+              <h3>What you&apos;re feeling</h3>
               <p>{result.emotion}</p>
             </div>
             

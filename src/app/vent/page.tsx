@@ -84,7 +84,7 @@ export default function Vent() {
       mediaRecorder.start();
       setIsRecording(true);
       updateWaveform();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Microphone access is required to vent. Please allow permissions.");
       console.error(err);
     }
@@ -115,8 +115,12 @@ export default function Vent() {
       setTranscript(data.transcript);
       setReply(data.reply);
       setVentContext(data.transcript); 
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "An unexpected error occurred.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
       setIsProcessing(false);
     }
   };
@@ -176,7 +180,7 @@ export default function Vent() {
               Help me break this down
             </button>
             <button className={styles.textBtn} onClick={() => router.push("/")}>
-              I'm done for now
+              I&apos;m done for now
             </button>
           </div>
         </section>

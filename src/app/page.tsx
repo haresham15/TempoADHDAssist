@@ -9,18 +9,11 @@ export default function Home() {
   const router = useRouter();
   const { userName } = useTempo();
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
-
   return (
     <main className={`page-container ${styles.container}`}>
       <header className={styles.header}>
         <h1 className={styles.title}>Hi {userName}</h1>
-        <p className={styles.subtitle}>How's your head feeling right now?</p>
+        <p className={styles.subtitle}>How&apos;s your head feeling right now?</p>
       </header>
 
       <div className={styles.intentList}>
@@ -32,8 +25,8 @@ export default function Home() {
             <ListTree className={styles.icon} strokeWidth={1.75} />
           </div>
           <div className={styles.cardContent}>
-            <h2>I'm overwhelmed</h2>
-            <p>Let's break it down</p>
+            <h2>I&apos;m overwhelmed</h2>
+            <p>Let&apos;s break it down</p>
           </div>
         </button>
 
@@ -45,8 +38,8 @@ export default function Home() {
             <MessagesSquare className={styles.icon} strokeWidth={1.75} />
           </div>
           <div className={styles.cardContent}>
-            <h2>I'm triggered</h2>
-            <p>Let's find the words</p>
+            <h2>I&apos;m triggered</h2>
+            <p>Let&apos;s find the words</p>
           </div>
         </button>
 
@@ -59,7 +52,7 @@ export default function Home() {
           </div>
           <div className={styles.cardContent}>
             <h2>I need to vent</h2>
-            <p>Just talk, I'm listening</p>
+            <p>Just talk, I&apos;m listening</p>
           </div>
         </button>
       </div>

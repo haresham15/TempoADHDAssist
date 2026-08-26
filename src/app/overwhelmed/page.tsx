@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
 import { ArrowLeft, GripVertical, Check } from "lucide-react";
@@ -9,17 +9,11 @@ import styles from "./page.module.css";
 export default function Overwhelmed() {
   const router = useRouter();
   const { ventContext } = useTempo();
-  const [task, setTask] = useState("");
+  const [task, setTask] = useState(ventContext || "");
   const [steps, setSteps] = useState<string[]>([]);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (ventContext) {
-      setTask(ventContext);
-    }
-  }, [ventContext]);
 
   const handleChunkTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +37,12 @@ export default function Overwhelmed() {
 
       const data = await response.json();
       setSteps(data.steps);
-    } catch (err) {
-      setError("Oops, something went wrong. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "An unexpected error occurred.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -123,7 +121,7 @@ export default function Overwhelmed() {
       
       {allCompleted && (
         <section className={styles.successContainer}>
-          <h2>That's the whole thing, done.</h2>
+          <h2>That&apos;s the whole thing, done.</h2>
           <button className={styles.outlineBtn} onClick={() => { setSteps([]); setTask(""); setCompletedSteps(new Set()); }}>
             Start something else
           </button>
