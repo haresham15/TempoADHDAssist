@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTempo } from "@/lib/TempoContext";
 import styles from "./page.module.css";
 
 export default function Overwhelmed() {
   const router = useRouter();
+  const { ventContext } = useTempo();
   const [task, setTask] = useState("");
   const [steps, setSteps] = useState<string[]>([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (ventContext) {
+      setTask(ventContext);
+    }
+  }, [ventContext]);
 
   const handleChunkTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +27,7 @@ export default function Overwhelmed() {
     setLoading(true);
     setError("");
     setSteps([]);
+    setCurrentStepIndex(0);
 
     try {
       const response = await fetch("/api/chunk-task", {
@@ -74,18 +84,31 @@ export default function Overwhelmed() {
         {error && <div className={styles.error}>{error}</div>}
       </section>
 
-      {steps.length > 0 && (
+      {steps.length > 0 && currentStepIndex < steps.length && (
         <section className={styles.stepsContainer}>
-          {steps.map((step: string, index: number) => (
-            <div 
-              key={index} 
-              className={styles.stepCard}
-              style={{ animationDelay: `${index * 0.15}s` }}
+          <div className={styles.stepCard}>
+            <div className={styles.stepNumber}>{currentStepIndex + 1}</div>
+            <div className={styles.stepText}>{steps[currentStepIndex]}</div>
+            <button 
+              className={styles.doneBtn}
+              onClick={() => setCurrentStepIndex(i => i + 1)}
             >
-              <div className={styles.stepNumber}>{index + 1}</div>
-              <div className={styles.stepText}>{step}</div>
-            </div>
-          ))}
+              Done ✨
+            </button>
+          </div>
+          <div className={styles.progressText}>
+            Step {currentStepIndex + 1} of {steps.length}
+          </div>
+        </section>
+      )}
+      
+      {steps.length > 0 && currentStepIndex >= steps.length && (
+        <section className={styles.successContainer}>
+          <h2>You did it! 🎉</h2>
+          <p>Total steps supported: {steps.length}</p>
+          <button className={styles.submitBtn} onClick={() => { setSteps([]); setTask(""); }}>
+            Start Another Task
+          </button>
         </section>
       )}
     </main>

@@ -1,16 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTempo } from "@/lib/TempoContext";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
+  const { userName } = useTempo();
 
   return (
     <main className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Tempo</h1>
-        <p className={styles.subtitle}>What do you need right now?</p>
+        <h1 className={styles.title}>Welcome, {userName}.</h1>
+        <p className={styles.subtitle}>What is your tempo right now?</p>
       </header>
 
       <div className={styles.intentGrid}>

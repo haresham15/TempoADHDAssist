@@ -71,28 +71,25 @@
 }
 
 .intentButton:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.1);
-  background: color-mix(in srgb, var(--glass-bg) 80%, var(--foreground) 5%);
+  background: color-mix(in srgb, var(--glass-bg) 80%, var(--text-primary) 5%);
+  /* subtle inner glow instead of outer shadow expansion */
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
 }
 
 .intentButton:active {
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.99);
 }
 
 .btnOverwhelm:hover {
-  border-color: rgba(33, 150, 243, 0.3);
-  box-shadow: 0 12px 40px 0 var(--accent-overwhelm);
+  border-color: rgba(118, 180, 189, 0.4); /* Muted Teal */
 }
 
 .btnTrigger:hover {
-  border-color: rgba(233, 30, 99, 0.3);
-  box-shadow: 0 12px 40px 0 var(--accent-trigger);
+  border-color: rgba(156, 181, 155, 0.4); /* Sage Green */
 }
 
 .btnVent:hover {
-  border-color: rgba(76, 175, 80, 0.3);
-  box-shadow: 0 12px 40px 0 var(--accent-vent);
+  border-color: rgba(198, 193, 210, 0.4); /* Lavender Gray */
 }
 
 .iconWrapper {

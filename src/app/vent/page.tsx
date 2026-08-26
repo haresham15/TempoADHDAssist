@@ -2,10 +2,12 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTempo } from "@/lib/TempoContext";
 import styles from "./page.module.css";
 
 export default function Vent() {
   const router = useRouter();
+  const { setVentContext } = useTempo();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [response, setResponse] = useState("");
@@ -63,11 +65,17 @@ export default function Vent() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ audio: base64Audio, mimeType: audioBlob.type }),
         });
-
-        if (!res.ok) throw new Error("Failed to process audio.");
         
         const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to process audio");
+        }
+        
         setResponse(data.reply);
+        if (data.transcript) {
+          setVentContext(data.transcript);
+        }
         speakResponse(data.reply);
       } catch (err) {
         console.error(err);
@@ -109,9 +117,9 @@ export default function Vent() {
 
       <header className={styles.header}>
         <h1 className={styles.title}>
-          <span style={{ fontSize: "2rem" }}>🎙️</span> Safe Venting Space
+          <span style={{ fontSize: "2rem" }}>🎙️</span> Voice Journal
         </h1>
-        <p className={styles.subtitle}>Speak freely. No judgment, no solutions—just validation.</p>
+        <p className={styles.subtitle}>Vocally brain-dump your stress and anxiety.</p>
       </header>
 
       <div className={styles.micContainer}>
@@ -135,12 +143,20 @@ export default function Vent() {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {response && !isProcessing && (
+      {response && (
         <section className={styles.responseContainer}>
-          <div className={styles.responseText}>"{response}"</div>
-          <button className={styles.replayBtn} onClick={() => speakResponse(response)}>
-            🔊 Replay Audio
-          </button>
+          <div className={styles.responseContent}>
+            {response}
+          </div>
+          <div className={styles.suggestionAction}>
+            <p>If you're feeling overwhelmed by what you just shared, we can break it down.</p>
+            <button 
+              className={styles.chunkBtn}
+              onClick={() => router.push('/overwhelmed')}
+            >
+              Help me break this down
+            </button>
+          </div>
         </section>
       )}
     </main>

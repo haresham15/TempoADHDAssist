@@ -1,47 +1,52 @@
 :root {
-  --background: #fafafa;
-  --foreground: #1c1c21;
+  /* Main Scheme (Relaxing Grounding) */
+  --bg-main: #F0EFEC; /* Warm Greige */
+  --bg-main-secondary: #D8D3CC; /* Linen Gray */
+  --bg-sage: #9CB59B; /* Soft Sage Green */
+  --accent-teal: #76B4BD; /* Muted Teal for CTA */
   
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  
-  --accent-overwhelm: #E3F2FD; /* Soft blue */
-  --accent-trigger: #FCE4EC; /* Soft pink */
-  --accent-vent: #E8F5E9; /* Soft green */
+  /* Vent Scheme (Empathetic Soothing) */
+  --bg-vent: #C6C1D2; /* Lavender Gray */
+  --bg-vent-secondary: #FAF7F2; /* Muted Stone/Cream */
 
+  /* Text Colors */
   --text-primary: #1c1c21;
   --text-secondary: #5e5e6a;
-  
+  --text-light: #f4f4f5;
+
+  /* UI Elements */
   --radius-lg: 24px;
   --radius-md: 16px;
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f1115;
-    --foreground: #f4f4f5;
+    /* For simplicity, we can keep the dark mode muted but darker */
+    --bg-main: #2A2928; 
+    --bg-main-secondary: #1E1E1E;
+    --bg-sage: #4A5D49; 
+    --accent-teal: #3B727A; 
     
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    
-    --accent-overwhelm: rgba(33, 150, 243, 0.15); /* Soft blue glow */
-    --accent-trigger: rgba(233, 30, 99, 0.15); /* Soft pink glow */
-    --accent-vent: rgba(76, 175, 80, 0.15); /* Soft green glow */
+    --bg-vent: #3B384A;
+    --bg-vent-secondary: #2C2A34;
 
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;
+    
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: var(--font-geist-sans), sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: Verdana, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
   min-height: 100vh;
 }
 

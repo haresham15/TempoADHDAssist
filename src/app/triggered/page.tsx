@@ -67,55 +67,70 @@ export default function Triggered() {
         If you are in crisis, please seek immediate help from a healthcare provider.
       </div>
 
-      <section className={styles.inputSection}>
-        <form onSubmit={handleProcessMessage} className={styles.inputWrapper}>
-          <textarea
-            className={styles.textarea}
-            placeholder="Paste a message you received that upset you, or a reply you drafted in anger/anxiety..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            disabled={loading}
-            autoFocus
-          />
-          <button 
-            type="submit" 
-            className={styles.submitBtn}
-            disabled={loading || !message.trim()}
-          >
-            {loading ? <div className={styles.loadingSpinner} /> : "Analyze & Neutralize"}
-          </button>
-        </form>
-        {error && <div className={styles.error}>{error}</div>}
-      </section>
+      <div className={styles.splitContainer}>
+        <section className={styles.inputSection}>
+          <form onSubmit={handleProcessMessage} className={styles.inputWrapper}>
+            <textarea
+              className={styles.textarea}
+              placeholder="Paste a message you received that upset you, or a reply you drafted in anger/anxiety..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              disabled={loading}
+              autoFocus
+            />
+            <button 
+              type="submit" 
+              className={styles.submitBtn}
+              disabled={loading || !message.trim()}
+            >
+              {loading ? <div className={styles.loadingSpinner} /> : "Mediator"}
+            </button>
+          </form>
+          {error && <div className={styles.error}>{error}</div>}
+        </section>
 
-      {result && (
         <section className={styles.resultContainer}>
-          <div className={styles.resultSection}>
-            <h2 className={`${styles.resultTitle} ${styles.neutral}`}>
-              <span>✨</span> Emotionally Neutral Translation
-            </h2>
-            <div className={styles.resultContent}>
-              {result.neutralTranslation}
+          {!result && !loading && (
+            <div className={styles.emptyState}>
+              <p>The mediator is ready to listen. Paste your thought on the left.</p>
             </div>
-          </div>
+          )}
+          {loading && (
+            <div className={styles.loadingState}>
+              <div className={styles.loadingSpinner} />
+              <p>Analyzing sentiment and facts...</p>
+            </div>
+          )}
+          {result && (
+            <div className={styles.resultContentWrapper}>
+              <div className={styles.resultSection}>
+                <h2 className={`${styles.resultTitle} ${styles.neutral}`}>
+                  <span>✨</span> Fact-Check & Translation
+                </h2>
+                <div className={styles.resultContent}>
+                  {result.neutralTranslation}
+                </div>
+              </div>
 
-          {result.distortions && result.distortions.length > 0 && (
-            <div className={styles.resultSection}>
-              <h2 className={`${styles.resultTitle} ${styles.distortions}`}>
-                <span>🔍</span> Cognitive Distortions Flagged
-              </h2>
-              <ul className={styles.distortionsList}>
-                {result.distortions.map((d: Distortion, index: number) => (
-                  <li key={index} className={styles.distortionItem}>
-                    <div className={styles.distortionName}>{d.name}</div>
-                    <div className={styles.distortionDesc}>{d.explanation}</div>
-                  </li>
-                ))}
-              </ul>
+              {result.distortions && result.distortions.length > 0 && (
+                <div className={styles.resultSection}>
+                  <h2 className={`${styles.resultTitle} ${styles.distortions}`}>
+                    <span>🔍</span> Cognitive Distortions Flagged
+                  </h2>
+                  <ul className={styles.distortionsList}>
+                    {result.distortions.map((d: Distortion, index: number) => (
+                      <li key={index} className={styles.distortionItem}>
+                        <div className={styles.distortionName}>{d.name}</div>
+                        <div className={styles.distortionDesc}>{d.explanation}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </section>
-      )}
+      </div>
     </main>
   );
 }
