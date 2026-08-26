@@ -1,45 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
-
-type HistoryItem = {
-  id: string;
-  type: "overwhelm" | "trigger" | "vent";
-  summary: string;
-  timestamp: string;
-  content: string;
-};
-
-// Mocked data for now
-const mockHistory: HistoryItem[] = [
-  {
-    id: "1",
-    type: "vent",
-    summary: "Talked about work stress",
-    timestamp: "2 hours ago",
-    content: "I've been feeling really overwhelmed with the new project deadlines. My manager keeps changing the requirements and I don't know how to keep up.",
-  },
-  {
-    id: "2",
-    type: "overwhelm",
-    summary: "Broke down 'Clean the kitchen'",
-    timestamp: "Yesterday",
-    content: "1. Empty dishwasher\n2. Load dirty plates\n3. Wipe counters",
-  },
-  {
-    id: "3",
-    type: "trigger",
-    summary: "Reframed an email from Sarah",
-    timestamp: "3 days ago",
-    content: "Original: 'Why did you do that?'\nReframed: 'Could you help me understand the reasoning behind this?'",
-  },
-];
+import { getHistory, HistoryItem } from "@/lib/history";
 
 export default function History() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+
+  useEffect(() => {
+    setHistoryItems(getHistory());
+  }, []);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -63,7 +36,12 @@ export default function History() {
       </header>
 
       <section className={styles.list}>
-        {mockHistory.map((item) => (
+        {historyItems.length === 0 && (
+          <p style={{ textAlign: "center", color: "var(--text-secondary)", marginTop: "2rem" }}>
+            Your history will appear here once you complete a session.
+          </p>
+        )}
+        {historyItems.map((item) => (
           <div 
             key={item.id} 
             className={`${styles.card} ${expandedId === item.id ? styles.expanded : ""}`}
@@ -75,7 +53,9 @@ export default function History() {
                 <span className={styles.summary}>{item.summary}</span>
               </div>
               <div className={styles.cardMeta}>
-                <span className={styles.timestamp}>{item.timestamp}</span>
+                <span className={styles.timestamp}>
+                  {new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
                 {expandedId === item.id ? (
                   <ChevronUp className={styles.chevron} strokeWidth={2} />
                 ) : (

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
 import { ArrowLeft, Mic } from "lucide-react";
 import styles from "./page.module.css";
+import { addHistory } from "@/lib/history";
 
 export default function Vent() {
   const router = useRouter();
@@ -100,13 +101,27 @@ export default function Vent() {
   };
 
   const processAudio = async (audioBlob: Blob) => {
-    const formData = new FormData();
-    formData.append("audio", audioBlob, "vent.webm");
+    // Convert Blob to Base64
+    const base64Audio = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = (reader.result as string).split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(audioBlob);
+    });
 
     try {
       const response = await fetch("/api/vent", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          audio: base64Audio,
+          mimeType: audioBlob.type || "audio/webm",
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to process your vent.");
@@ -115,6 +130,12 @@ export default function Vent() {
       setTranscript(data.transcript);
       setReply(data.reply);
       setVentContext(data.transcript); 
+      
+      addHistory({
+        type: "vent",
+        summary: `Vented for a moment`,
+        content: `Transcript: ${data.transcript}\n\nTempo: ${data.reply}`
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");

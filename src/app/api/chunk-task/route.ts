@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { parseJsonFromLLM } from "@/lib/utils";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const maxDuration = 60; // Allow up to 60s for Vercel Serverless Function
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
   try {
     const { task } = await req.json();
 

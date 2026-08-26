@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { ArrowLeft, GripVertical, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
+import Link from "next/link";
 import styles from "./page.module.css";
+import { addHistory } from "@/lib/history";
 
 export default function Overwhelmed() {
   const router = useRouter();
@@ -37,6 +39,12 @@ export default function Overwhelmed() {
 
       const data = await response.json();
       setSteps(data.steps);
+      
+      addHistory({
+        type: "overwhelm",
+        summary: `Broke down '${task.slice(0, 30)}${task.length > 30 ? "..." : ""}'`,
+        content: data.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
@@ -85,7 +93,7 @@ export default function Overwhelmed() {
               className={styles.submitBtn}
               disabled={loading || !task.trim()}
             >
-              {loading ? <div className={styles.loadingSpinner} /> : "Break it down"}
+              {loading ? <span className={styles.pulseText}>Breaking it down...</span> : "Break it down"}
             </button>
           </form>
           {error && <div className={styles.error}>{error}</div>}
@@ -110,9 +118,6 @@ export default function Overwhelmed() {
                   {isCompleted && <Check strokeWidth={3} className={styles.checkIcon} />}
                 </button>
                 <div className={styles.stepText}>{step}</div>
-                <div className={styles.dragHandle}>
-                  <GripVertical strokeWidth={1.5} />
-                </div>
               </div>
             );
           })}

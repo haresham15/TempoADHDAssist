@@ -37,7 +37,7 @@ Create a `.env.local` file in the root directory and add the following keys:
 ```env
 # AI Models
 DEEPSEEK_API_KEY=your_deepseek_api_key
-GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY_TEMPO=your_gemini_api_key
 
 # Supabase (Optional for V1 MVP, required for Auth/DB features)
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url

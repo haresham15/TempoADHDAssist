@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { Sun, Moon } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
+import { useTempo } from "@/lib/TempoContext";
 
 export default function Settings() {
-  const [motion, setMotion] = useState("full");
-  const [sound, setSound] = useState(true);
-  const [contrast, setContrast] = useState("standard");
-  const [textSize, setTextSize] = useState(1); // 0, 1, 2
-  const [theme, setTheme] = useState("light");
+  const { 
+    userName, setUserName,
+    motion, setMotion,
+    sound, setSound,
+    contrast, setContrast,
+    textSize, setTextSize,
+    theme, setTheme 
+  } = useTempo();
 
   return (
     <main className={`page-container ${styles.container}`}>
@@ -21,6 +24,21 @@ export default function Settings() {
       </header>
 
       <section className={styles.settingsList}>
+        
+        {/* Name */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <h3>Your Name</h3>
+            <p>How we greet you on the Intent Hub</p>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Friend"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            className={styles.textInput}
+          />
+        </div>
         
         {/* Motion */}
         <div className={styles.settingRow}>

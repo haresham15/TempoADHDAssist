@@ -187,21 +187,13 @@
   animation: strikethrough 0.3s var(--easing) forwards;
 }
 
-/* Drag Handle */
-.dragHandle {
-  color: var(--text-secondary);
-  opacity: 0;
-  cursor: grab;
-  transition: opacity 0.2s;
-  display: flex;
+.pulseText {
+  animation: pulseOpacity 1.5s ease-in-out infinite;
 }
 
-.stepCard:hover .dragHandle {
-  opacity: 0.4;
-}
-.stepCard .dragHandle:active {
-  opacity: 1;
-  cursor: grabbing;
+@keyframes pulseOpacity {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* Success Container */

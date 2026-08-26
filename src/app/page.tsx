@@ -7,16 +7,16 @@ import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const router = useRouter();
   const { userName } = useTempo();
+  const router = useRouter();
 
   return (
     <main className={`page-container ${styles.container}`}>
       <BrandHeader />
       
       <header className={styles.header}>
-        <h1 className={styles.title}>Hi {userName}</h1>
-        <p className={styles.subtitle}>How&apos;s your head feeling right now?</p>
+        <h1 className={styles.greeting}>Hi {userName || "Friend"}</h1>
+        <p className={styles.subtitle}>What do you need right now?</p>
       </header>
 
       <div className={styles.intentList}>

@@ -17,6 +17,23 @@
   margin-bottom: 0.5rem;
 }
 
+.textInput {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--border-light);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+  width: 150px;
+  text-align: right;
+  transition: border-color 0.2s;
+}
+
+.textInput:focus {
+  outline: none;
+  border-bottom-color: var(--primary-sage);
+}
+
 .subtitle {
   font-size: 1.1rem;
   color: var(--text-secondary);

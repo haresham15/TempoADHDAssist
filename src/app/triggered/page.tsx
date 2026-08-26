@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Pause, Copy, Check } from "lucide-react";
 import styles from "./page.module.css";
+import { addHistory } from "@/lib/history";
 
 export default function Triggered() {
   const router = useRouter();
@@ -35,6 +36,12 @@ export default function Triggered() {
 
       const data = await response.json();
       setResult(data);
+      
+      addHistory({
+        type: "trigger",
+        summary: `Reframed '${message.slice(0, 30)}${message.length > 30 ? "..." : ""}'`,
+        content: `Original: ${message}\nReframed: ${data.translation}`
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");

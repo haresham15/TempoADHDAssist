@@ -35,16 +35,5 @@ create policy "Allow anonymous inserts to rsd_logs"
   to anon
   with check (true);
 
--- (Optional) If you want to be able to view them in a future dashboard, 
--- you can enable reading for anon users (or just for authenticated users).
-create policy "Allow anonymous select on task_chunks"
-  on public.task_chunks
-  for select
-  to anon
-  using (true);
-
-create policy "Allow anonymous select on rsd_logs"
-  on public.rsd_logs
-  for select
-  to anon
-  using (true);
+-- The previous anonymous select policies have been removed for data privacy.
+-- Wait until Authentication is fully implemented, then scope SELECT to auth.uid() = user_id.
