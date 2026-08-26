@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import BrandHeader from "@/components/BrandHeader";
 
 type HistoryItem = {
   id: string;
@@ -55,6 +56,7 @@ export default function History() {
 
   return (
     <main className={`page-container ${styles.container}`}>
+      <BrandHeader />
       <header className={styles.header}>
         <h1 className={styles.title}>History</h1>
         <p className={styles.subtitle}>Past sessions and reflections.</p>

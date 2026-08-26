@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
 import { ListTree, MessagesSquare, AudioLines } from "lucide-react";
+import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -11,6 +12,8 @@ export default function Home() {
 
   return (
     <main className={`page-container ${styles.container}`}>
+      <BrandHeader />
+      
       <header className={styles.header}>
         <h1 className={styles.title}>Hi {userName}</h1>
         <p className={styles.subtitle}>How&apos;s your head feeling right now?</p>

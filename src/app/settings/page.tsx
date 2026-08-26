@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sun, Moon } from "lucide-react";
+import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
 
 export default function Settings() {
@@ -13,6 +14,7 @@ export default function Settings() {
 
   return (
     <main className={`page-container ${styles.container}`}>
+      <BrandHeader />
       <header className={styles.header}>
         <h1 className={styles.title}>Settings</h1>
         <p className={styles.subtitle}>Personalize your calm space.</p>
