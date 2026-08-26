@@ -1,42 +1,92 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
+import { ArrowLeft, Mic } from "lucide-react";
 import styles from "./page.module.css";
 
 export default function Vent() {
   const router = useRouter();
   const { setVentContext } = useTempo();
+  
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [response, setResponse] = useState("");
+  const [transcript, setTranscript] = useState("");
+  const [reply, setReply] = useState("");
   const [error, setError] = useState("");
+  const [volumes, setVolumes] = useState<number[]>([0, 0, 0, 0, 0]); // 5 bars
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const chunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (audioContextRef.current) audioContextRef.current.close();
+    };
+  }, []);
+
+  const updateWaveform = () => {
+    if (!analyserRef.current) return;
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteFrequencyData(dataArray);
+    
+    // Sample 5 distinct frequency bands
+    const step = Math.floor(dataArray.length / 5);
+    const newVolumes = Array(5).fill(0).map((_, i) => {
+      let sum = 0;
+      for (let j = 0; j < step; j++) {
+        sum += dataArray[i * step + j];
+      }
+      return (sum / step) / 255; // Normalize 0 to 1
+    });
+
+    setVolumes(newVolumes);
+    animationRef.current = requestAnimationFrame(updateWaveform);
+  };
 
   const startRecording = async () => {
     try {
+      setError("");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Set up Audio Analyser
+      const audioCtx = new window.AudioContext();
+      audioContextRef.current = audioCtx;
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      analyserRef.current = analyser;
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      chunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
       };
 
-      mediaRecorder.onstop = handleAudioStop;
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+        await processAudio(audioBlob);
+        
+        // Cleanup stream
+        stream.getTracks().forEach(track => track.stop());
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+        if (audioContextRef.current) audioContextRef.current.close();
+      };
+
       mediaRecorder.start();
       setIsRecording(true);
-      setError("");
-      setResponse("");
-    } catch (err) {
-      console.error("Error accessing microphone:", err);
-      setError("Microphone access denied or unavailable.");
+      updateWaveform();
+    } catch (err: any) {
+      setError("Microphone access is required to vent. Please allow permissions.");
+      console.error(err);
     }
   };
 
@@ -45,116 +95,88 @@ export default function Vent() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsProcessing(true);
-      // Stop all tracks to turn off the mic light
-      mediaRecorderRef.current.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+      setVolumes([0, 0, 0, 0, 0]);
     }
   };
 
-  const handleAudioStop = async () => {
-    const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-    
-    // Read blob as base64 to send in JSON payload
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async () => {
-      const base64Audio = (reader.result as string).split(',')[1];
-      
-      try {
-        const res = await fetch("/api/vent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ audio: base64Audio, mimeType: audioBlob.type }),
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to process audio");
-        }
-        
-        setResponse(data.reply);
-        if (data.transcript) {
-          setVentContext(data.transcript);
-        }
-        speakResponse(data.reply);
-      } catch (err) {
-        console.error(err);
-        setError("Could not process audio. Please try again.");
-      } finally {
-        setIsProcessing(false);
-      }
-    };
-  };
+  const processAudio = async (audioBlob: Blob) => {
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "vent.webm");
 
-  const speakResponse = (text: string) => {
-    if ("speechSynthesis" in window) {
-      // Stop any ongoing speech
-      window.speechSynthesis.cancel();
+    try {
+      const response = await fetch("/api/vent", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Failed to process your vent.");
       
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95; // Slightly slower, calmer
-      utterance.pitch = 1.0;
-      
-      // Try to find a good female/calm voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const calmVoice = voices.find(v => v.name.includes("Samantha") || v.name.includes("Google UK English Female") || v.name.includes("Natural"));
-      if (calmVoice) {
-        utterance.voice = calmVoice;
-      }
-      
-      window.speechSynthesis.speak(utterance);
+      const data = await response.json();
+      setTranscript(data.transcript);
+      setReply(data.reply);
+      setVentContext(data.transcript); 
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+      setIsProcessing(false);
     }
   };
 
   return (
-    <main className={styles.container}>
-      <button className={styles.backButton} onClick={() => {
-        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-        router.push("/");
-      }}>
-        &larr; Back to Hub
+    <main className={`page-container ${styles.container}`}>
+      <button className={styles.backButton} onClick={() => router.push("/")}>
+        <ArrowLeft className={styles.backIcon} strokeWidth={2} />
       </button>
 
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <span style={{ fontSize: "2rem" }}>🎙️</span> Voice Journal
-        </h1>
-        <p className={styles.subtitle}>Vocally brain-dump your stress and anxiety.</p>
-      </header>
-
-      <div className={styles.micContainer}>
-        <button
-          className={`${styles.micButton} ${isRecording ? styles.recording : ""} ${isProcessing ? styles.processing : ""}`}
-          onMouseDown={isProcessing ? undefined : startRecording}
-          onMouseUp={isProcessing ? undefined : stopRecording}
-          onTouchStart={isProcessing ? undefined : startRecording}
-          onTouchEnd={isProcessing ? undefined : stopRecording}
-          disabled={isProcessing}
-        >
-          {isProcessing ? "⏳" : (isRecording ? "🔴" : "🎤")}
-        </button>
-
-        <div className={styles.statusText}>
-          {isProcessing 
-            ? "Processing your thoughts..." 
-            : (isRecording ? "Listening... Release to stop" : "Hold to talk")}
-        </div>
-      </div>
-
-      {error && <div className={styles.error}>{error}</div>}
-
-      {response && (
-        <section className={styles.responseContainer}>
-          <div className={styles.responseContent}>
-            {response}
-          </div>
-          <div className={styles.suggestionAction}>
-            <p>If you're feeling overwhelmed by what you just shared, we can break it down.</p>
+      {!transcript && !reply ? (
+        <section className={styles.recordingSection}>
+          <div className={styles.micWrapper}>
+            {/* Visualizer Bars */}
+            <div className={`${styles.visualizer} ${isRecording ? styles.active : ""}`}>
+              {volumes.map((vol, i) => (
+                <div 
+                  key={i} 
+                  className={styles.bar} 
+                  style={{ transform: `scaleY(${Math.max(0.2, vol * 1.5)})` }}
+                />
+              ))}
+            </div>
+            
+            {/* Mic Button */}
             <button 
-              className={styles.chunkBtn}
-              onClick={() => router.push('/overwhelmed')}
+              className={`${styles.micButton} ${isRecording ? styles.recording : ""} ${isProcessing ? styles.processing : ""}`}
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isProcessing}
             >
+              <Mic strokeWidth={2.5} className={styles.micIcon} />
+            </button>
+            
+            {/* Ambient Ring for when idle */}
+            {!isRecording && !isProcessing && <div className={styles.ambientRing} />}
+          </div>
+
+          <div className={styles.statusText}>
+            {isProcessing ? "Finding the words..." : isRecording ? "I'm listening..." : "Tap to start venting"}
+          </div>
+
+          {error && <div className={styles.error}>{error}</div>}
+        </section>
+      ) : (
+        <section className={styles.resultSection}>
+          <div className={styles.replyCard}>
+            <p className={styles.replyText}>{reply}</p>
+          </div>
+          
+          <div className={styles.transcriptCard}>
+            <h3>What you said:</h3>
+            <p>{transcript}</p>
+          </div>
+
+          <div className={styles.actions}>
+            <button className={styles.outlineBtn} onClick={() => router.push("/overwhelmed")}>
               Help me break this down
+            </button>
+            <button className={styles.textBtn} onClick={() => router.push("/")}>
+              I'm done for now
             </button>
           </div>
         </section>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
+import { ArrowLeft, GripVertical, Check } from "lucide-react";
 import styles from "./page.module.css";
 
 export default function Overwhelmed() {
@@ -10,7 +11,7 @@ export default function Overwhelmed() {
   const { ventContext } = useTempo();
   const [task, setTask] = useState("");
   const [steps, setSteps] = useState<string[]>([]);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,7 +28,7 @@ export default function Overwhelmed() {
     setLoading(true);
     setError("");
     setSteps([]);
-    setCurrentStepIndex(0);
+    setCompletedSteps(new Set());
 
     try {
       const response = await fetch("/api/chunk-task", {
@@ -49,65 +50,82 @@ export default function Overwhelmed() {
     }
   };
 
+  const toggleStep = (index: number) => {
+    setCompletedSteps(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
+
+  const allCompleted = steps.length > 0 && completedSteps.size === steps.length;
+
   return (
-    <main className={styles.container}>
+    <main className={`page-container ${styles.container}`}>
       <button className={styles.backButton} onClick={() => router.push("/")}>
-        &larr; Back to Hub
+        <ArrowLeft className={styles.backIcon} strokeWidth={2} /> 
       </button>
 
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <span style={{ fontSize: "2rem" }}>🧩</span> Task Chunker
-        </h1>
-        <p className={styles.subtitle}>Break big things into small physical actions.</p>
-      </header>
-
-      <section className={styles.inputSection}>
-        <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
-          <input
-            type="text"
-            className={styles.input}
-            placeholder="What's on your mind? (e.g., Clean my room)"
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-            disabled={loading}
-            autoFocus
-          />
-          <button 
-            type="submit" 
-            className={styles.submitBtn}
-            disabled={loading || !task.trim()}
-          >
-            {loading ? <div className={styles.loadingSpinner} /> : "Break it down"}
-          </button>
-        </form>
-        {error && <div className={styles.error}>{error}</div>}
-      </section>
-
-      {steps.length > 0 && currentStepIndex < steps.length && (
-        <section className={styles.stepsContainer}>
-          <div className={styles.stepCard}>
-            <div className={styles.stepNumber}>{currentStepIndex + 1}</div>
-            <div className={styles.stepText}>{steps[currentStepIndex]}</div>
+      {steps.length === 0 && (
+        <section className={styles.inputSection}>
+          <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
+            <input
+              type="text"
+              className={styles.input}
+              placeholder="What's the one thing on your mind?"
+              value={task}
+              onChange={(e) => setTask(e.target.value)}
+              disabled={loading}
+              autoFocus
+            />
             <button 
-              className={styles.doneBtn}
-              onClick={() => setCurrentStepIndex(i => i + 1)}
+              type="submit" 
+              className={styles.submitBtn}
+              disabled={loading || !task.trim()}
             >
-              Done ✨
+              {loading ? <div className={styles.loadingSpinner} /> : "Break it down"}
             </button>
-          </div>
-          <div className={styles.progressText}>
-            Step {currentStepIndex + 1} of {steps.length}
-          </div>
+          </form>
+          {error && <div className={styles.error}>{error}</div>}
+        </section>
+      )}
+
+      {steps.length > 0 && !allCompleted && (
+        <section className={styles.stepsContainer}>
+          {steps.map((step: string, index: number) => {
+            const isCompleted = completedSteps.has(index);
+            return (
+              <div 
+                key={index} 
+                className={`${styles.stepCard} ${isCompleted ? styles.completedCard : ""}`}
+                style={{ animationDelay: `${index * 0.12}s` }}
+              >
+                <button 
+                  className={`${styles.checkbox} ${isCompleted ? styles.checked : ""}`}
+                  onClick={() => toggleStep(index)}
+                  aria-label="Mark complete"
+                >
+                  {isCompleted && <Check strokeWidth={3} className={styles.checkIcon} />}
+                </button>
+                <div className={styles.stepText}>{step}</div>
+                <div className={styles.dragHandle}>
+                  <GripVertical strokeWidth={1.5} />
+                </div>
+              </div>
+            );
+          })}
         </section>
       )}
       
-      {steps.length > 0 && currentStepIndex >= steps.length && (
+      {allCompleted && (
         <section className={styles.successContainer}>
-          <h2>You did it! 🎉</h2>
-          <p>Total steps supported: {steps.length}</p>
-          <button className={styles.submitBtn} onClick={() => { setSteps([]); setTask(""); }}>
-            Start Another Task
+          <h2>That's the whole thing, done.</h2>
+          <button className={styles.outlineBtn} onClick={() => { setSteps([]); setTask(""); setCompletedSteps(new Set()); }}>
+            Start something else
           </button>
         </section>
       )}

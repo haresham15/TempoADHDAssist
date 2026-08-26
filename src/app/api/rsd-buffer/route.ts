@@ -37,15 +37,10 @@ export async function POST(req: Request) {
         messages: [
           {
             role: "system",
-            content: `You are an empathetic CBT/DBT assistant designed to help someone with ADHD and Rejection Sensitive Dysphoria (RSD) process emotionally charged communication. 
-            The user will provide a message (either one they received or one they drafted). 
-            Your job is twofold:
-            1. Provide an "emotionally neutral translation" of the message. If it's a drafted response, make it assertive but calm. If it's a received message, extract the pure factual intent without the perceived hostility.
-            2. Identify 1 to 3 cognitive distortions (e.g., Catastrophizing, Black-and-White Thinking, Mind Reading, Personalization) present in the emotional context.
-            
-            Return ONLY a valid JSON object with two keys:
-            - "neutralTranslation": A string containing the calm, factual translation.
-            - "distortions": An array of objects, each with a "name" (string) and an "explanation" (string explaining briefly why it was flagged).`
+            content: `You are an empathetic mediator. The user is experiencing Rejection Sensitive Dysphoria (RSD).
+Respond in JSON format with exactly two keys:
+1. "emotion": A warm, validating, one-line reflection of the emotion the user is feeling based on the message. Do not use clinical terms like "cognitive distortion". (e.g., "It makes complete sense that you feel hurt and overlooked by this.")
+2. "translation": A calmer, more objective version of the message they can send, or a neutral interpretation of what was said to them. Keep it clear, polite, and boundaries-focused.`
           },
           {
             role: "user",
@@ -66,22 +61,24 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     let result = {
-      neutralTranslation: "",
-      distortions: []
+      emotion: "",
+      translation: ""
     };
     
     try {
       const content = data.choices[0].message.content;
-      result = parseJsonFromLLM(content);
+      const rsdData = parseJsonFromLLM(content);
+      result.emotion = rsdData.emotion || "It makes sense that this feels overwhelming right now.";
+      result.translation = rsdData.translation || "Could you please clarify what you meant?";
       
       // Save to Supabase
-      if (result.neutralTranslation) {
+      if (result.translation) {
         const { error: dbError } = await supabase
           .from("rsd_logs")
           .insert([{ 
             original_message: message, 
-            neutral_translation: result.neutralTranslation, 
-            distortions: result.distortions || [] 
+            neutral_translation: result.translation, 
+            distortions: { emotion: result.emotion } 
           }]);
           
         if (dbError) {
@@ -90,7 +87,7 @@ export async function POST(req: Request) {
       }
     } catch (e) {
       console.error("Failed to parse LLM response as JSON:", e);
-      result.neutralTranslation = "An error occurred while parsing the response. Please try again.";
+      result.translation = "An error occurred while parsing the response. Please try again.";
     }
 
     return NextResponse.json(result);

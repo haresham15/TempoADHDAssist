@@ -3,143 +3,130 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
+  height: 100%;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 4rem;
-  animation: fadeInDown 0.8s ease-out forwards;
+  margin-bottom: 3rem;
+  animation: fadeInDown 0.6s var(--easing) forwards;
 }
 
 .title {
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: var(--text-secondary); /* Quiet greeting */
   margin-bottom: 0.5rem;
-  color: var(--text-primary);
 }
 
 .subtitle {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
+  font-size: 1.1rem;
   font-weight: 400;
+  color: var(--text-primary);
 }
 
-.intentGrid {
+.intentList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
   width: 100%;
-  max-width: 600px;
+  max-width: 360px; /* Keep it focused on desktop */
 }
 
-.intentButton {
+.intentCard {
+  width: 100%;
+  border-radius: 20px;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 1.5rem 2rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--glass-shadow);
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 500;
-  font-family: inherit;
+  gap: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  animation: fadeInUp 0.8s ease-out forwards;
+  text-align: left;
+  transition: all 0.2s var(--easing);
+  animation: fadeInUp 0.6s var(--easing) forwards;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(10px);
 }
 
-.intentButton:nth-child(1) {
-  animation-delay: 0.1s;
+/* Stagger animations */
+.intentCard:nth-child(1) { animation-delay: 0.1s; }
+.intentCard:nth-child(2) { animation-delay: 0.2s; }
+.intentCard:nth-child(3) { animation-delay: 0.3s; }
+
+.cardOverwhelm {
+  background: #E5EDE7;
+  color: var(--text-primary);
+}
+.cardOverwhelm .iconWrapper { color: #587F63; }
+
+.cardTriggered {
+  background: #EFEBF5;
+  color: var(--text-primary);
+}
+.cardTriggered .iconWrapper { color: #8777A3; }
+
+.cardVent {
+  background: #FBEEE8;
+  color: var(--text-primary);
+}
+.cardVent .iconWrapper { color: #B37D66; }
+
+
+.intentCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.intentButton:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.intentButton:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.intentButton:hover {
-  background: color-mix(in srgb, var(--glass-bg) 80%, var(--text-primary) 5%);
-  /* subtle inner glow instead of outer shadow expansion */
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
-}
-
-.intentButton:active {
-  transform: scale(0.99);
-}
-
-.btnOverwhelm:hover {
-  border-color: rgba(118, 180, 189, 0.4); /* Muted Teal */
-}
-
-.btnTrigger:hover {
-  border-color: rgba(156, 181, 155, 0.4); /* Sage Green */
-}
-
-.btnVent:hover {
-  border-color: rgba(198, 193, 210, 0.4); /* Lavender Gray */
-}
+.cardOverwhelm:hover { background: color-mix(in srgb, #E5EDE7 94%, black); }
+.cardTriggered:hover { background: color-mix(in srgb, #EFEBF5 94%, black); }
+.cardVent:hover { background: color-mix(in srgb, #FBEEE8 94%, black); }
 
 .iconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  margin-right: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 1.5rem;
+  transition: transform 0.18s ease-out;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+}
+
+.intentCard:hover .iconWrapper {
+  transform: scale(1.06);
+}
+
+.intentCard:active {
+  transform: scale(0.98);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cardContent h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cardContent p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 600px) {
-  .title {
-    font-size: 2.5rem;
-  }
-  
-  .intentButton {
-    padding: 1.25rem 1.5rem;
-    font-size: 1.25rem;
-  }
-  
-  .iconWrapper {
-    width: 40px;
-    height: 40px;
-    margin-right: 1rem;
-    font-size: 1.25rem;
-  }
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }

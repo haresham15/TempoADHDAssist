@@ -2,42 +2,65 @@
 
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
+import { ListTree, MessagesSquare, AudioLines } from "lucide-react";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
   const { userName } = useTempo();
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
-    <main className={styles.container}>
+    <main className={`page-container ${styles.container}`}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Welcome, {userName}.</h1>
-        <p className={styles.subtitle}>What is your tempo right now?</p>
+        <h1 className={styles.title}>Hi {userName}</h1>
+        <p className={styles.subtitle}>How's your head feeling right now?</p>
       </header>
 
-      <div className={styles.intentGrid}>
+      <div className={styles.intentList}>
         <button 
-          className={`${styles.intentButton} ${styles.btnOverwhelm}`}
-          onClick={() => router.push("/overwhelmed")}
+          className={`${styles.intentCard} ${styles.cardOverwhelm}`}
+          onClick={() => router.push('/overwhelmed')}
         >
-          <div className={styles.iconWrapper}>🧩</div>
-          I&apos;m Overwhelmed
+          <div className={styles.iconWrapper}>
+            <ListTree className={styles.icon} strokeWidth={1.75} />
+          </div>
+          <div className={styles.cardContent}>
+            <h2>I'm overwhelmed</h2>
+            <p>Let's break it down</p>
+          </div>
         </button>
 
         <button 
-          className={`${styles.intentButton} ${styles.btnTrigger}`}
-          onClick={() => router.push("/triggered")}
+          className={`${styles.intentCard} ${styles.cardTriggered}`}
+          onClick={() => router.push('/triggered')}
         >
-          <div className={styles.iconWrapper}>🛡️</div>
-          I&apos;m Triggered
+          <div className={styles.iconWrapper}>
+            <MessagesSquare className={styles.icon} strokeWidth={1.75} />
+          </div>
+          <div className={styles.cardContent}>
+            <h2>I'm triggered</h2>
+            <p>Let's find the words</p>
+          </div>
         </button>
 
         <button 
-          className={`${styles.intentButton} ${styles.btnVent}`}
-          onClick={() => router.push("/vent")}
+          className={`${styles.intentCard} ${styles.cardVent}`}
+          onClick={() => router.push('/vent')}
         >
-          <div className={styles.iconWrapper}>🎙️</div>
-          I Need to Vent
+          <div className={styles.iconWrapper}>
+            <AudioLines className={styles.icon} strokeWidth={1.75} />
+          </div>
+          <div className={styles.cardContent}>
+            <h2>I need to vent</h2>
+            <p>Just talk, I'm listening</p>
+          </div>
         </button>
       </div>
     </main>

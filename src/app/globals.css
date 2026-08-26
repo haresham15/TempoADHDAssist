@@ -1,62 +1,136 @@
 :root {
-  /* Main Scheme (Relaxing Grounding) */
-  --bg-main: #F0EFEC; /* Warm Greige */
-  --bg-main-secondary: #D8D3CC; /* Linen Gray */
-  --bg-sage: #9CB59B; /* Soft Sage Green */
-  --accent-teal: #76B4BD; /* Muted Teal for CTA */
+  /* V2 Color System - Light Mode */
+  --bg-base: #FAF6F0; /* Warm Ivory */
+  --bg-surface: #F3EFE6; /* Soft Linen */
   
-  /* Vent Scheme (Empathetic Soothing) */
-  --bg-vent: #C6C1D2; /* Lavender Gray */
-  --bg-vent-secondary: #FAF7F2; /* Muted Stone/Cream */
-
-  /* Text Colors */
-  --text-primary: #1c1c21;
-  --text-secondary: #5e5e6a;
-  --text-light: #f4f4f5;
+  --primary-sage: #8CAF95; /* Muted Sage Green */
+  --secondary-blue: #7EA3C4; /* Powder Blue */
+  
+  --module-lavender: #B5A8D1; /* Soft Lavender (RSD) */
+  --module-blush: #E8B4A0; /* Warm Blush (Vent) */
+  
+  --accent-celebration: #E3B857; /* Muted Honey Gold */
+  
+  --text-primary: #3A3D3A; /* Soft Charcoal */
+  --text-secondary: #6B6F6B; /* Warm Gray */
+  
+  --border-hairline: #E5E0D5; /* Hairline Sand */
 
   /* UI Elements */
   --radius-lg: 24px;
   --radius-md: 16px;
-  --glass-bg: rgba(255, 255, 255, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* For simplicity, we can keep the dark mode muted but darker */
-    --bg-main: #2A2928; 
-    --bg-main-secondary: #1E1E1E;
-    --bg-sage: #4A5D49; 
-    --accent-teal: #3B727A; 
+    /* V2 Color System - Dark Mode ("Low-Stim Night") */
+    --bg-base: #1C2126; 
+    --bg-surface: #262B31;
     
-    --bg-vent: #3B384A;
-    --bg-vent-secondary: #2C2A34;
-
-    --text-primary: #f4f4f5;
-    --text-secondary: #a1a1aa;
+    --primary-sage: #9DBFA3; 
+    --secondary-blue: #8FB8D6;
     
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --module-lavender: #C3B6DE;
+    --module-blush: #EFC3B2;
+    
+    --text-primary: #EDEAE2;
+    --text-secondary: #A9AFA9;
+    
+    --border-hairline: #353A40;
+    
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
 }
 
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: Verdana, Arial, sans-serif;
-  background-color: var(--bg-main);
+  background-color: var(--bg-base);
   color: var(--text-primary);
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color 0.5s var(--easing), color 0.5s var(--easing);
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base resets */
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* The Living Background Mesh */
+body::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: -2;
+  /* Soft, oversized blobs in a radial gradient */
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(140, 175, 149, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(126, 163, 196, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(181, 168, 209, 0.08) 0%, transparent 50%);
+  background-size: 100% 100%;
+  animation: drift 60s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* 2-3% noise overlay */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03; /* barely visible grain */
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-2%, 3%) scale(1.02); }
+  100% { transform: translate(3%, -2%) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Generic Layout Containers */
+.page-container {
+  padding: 2rem 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 6rem; /* space for bottom nav */
+}
+
+/* Typography styles */
+p {
+  line-height: 1.6;
+  max-width: 65ch; /* max line length for ADHD reading */
+}
+
+/* Base button styles matching V2 */
+button {
+  font-family: inherit;
 }

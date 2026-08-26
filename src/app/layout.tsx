@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { TempoProvider } from "@/lib/TempoContext";
+import Navigation from "@/components/Navigation";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Tempo | Intent-Driven Support",
@@ -13,10 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.className}>
       <body>
         <TempoProvider>
           {children}
+          <Navigation />
         </TempoProvider>
       </body>
     </html>

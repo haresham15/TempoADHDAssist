@@ -2,32 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Pause, Copy, Check } from "lucide-react";
 import styles from "./page.module.css";
-
-interface Distortion {
-  name: string;
-  explanation: string;
-}
-
-interface BufferResponse {
-  neutralTranslation: string;
-  distortions: Distortion[];
-}
 
 export default function Triggered() {
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [result, setResult] = useState<BufferResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ emotion: string; translation: string } | null>(null);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
-  const handleProcessMessage = async (e: React.FormEvent) => {
+  const handleProcess = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     setLoading(true);
     setError("");
     setResult(null);
+    setCopied(false);
 
     try {
       const response = await fetch("/api/rsd-buffer", {
@@ -37,100 +30,95 @@ export default function Triggered() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to process message");
+        throw new Error("Failed to process message.");
       }
 
       const data = await response.json();
       setResult(data);
-    } catch (err) {
-      setError("Oops, something went wrong. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCopy = () => {
+    if (result?.translation) {
+      navigator.clipboard.writeText(result.translation);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
   return (
-    <main className={styles.container}>
+    <main className={`page-container ${styles.container}`}>
       <button className={styles.backButton} onClick={() => router.push("/")}>
-        &larr; Back to Hub
+        <ArrowLeft className={styles.backIcon} strokeWidth={2} />
       </button>
 
       <header className={styles.header}>
-        <h1 className={styles.title}>
-          <span style={{ fontSize: "2rem" }}>🛡️</span> Communication Buffer
-        </h1>
-        <p className={styles.subtitle}>Process intense messages safely before responding.</p>
+        <div className={styles.pauseIconWrapper}>
+          <Pause strokeWidth={2} className={styles.pauseIcon} />
+        </div>
       </header>
 
-      <div className={styles.disclaimer}>
-        <strong>Note:</strong> Tempo is a digital tool, not a substitute for professional therapy or medical advice. 
-        If you are in crisis, please seek immediate help from a healthcare provider.
-      </div>
-
-      <div className={styles.splitContainer}>
+      {!result ? (
         <section className={styles.inputSection}>
-          <form onSubmit={handleProcessMessage} className={styles.inputWrapper}>
+          <form onSubmit={handleProcess} className={styles.form}>
             <textarea
               className={styles.textarea}
-              placeholder="Paste a message you received that upset you, or a reply you drafted in anger/anxiety..."
+              placeholder="Paste what they said, or what you're about to send."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               disabled={loading}
               autoFocus
             />
+            
             <button 
               type="submit" 
-              className={styles.submitBtn}
+              className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
               disabled={loading || !message.trim()}
             >
-              {loading ? <div className={styles.loadingSpinner} /> : "Mediator"}
+              {loading ? "Taking a breath with this..." : "Help me see this clearly"}
             </button>
           </form>
           {error && <div className={styles.error}>{error}</div>}
         </section>
-
-        <section className={styles.resultContainer}>
-          {!result && !loading && (
-            <div className={styles.emptyState}>
-              <p>The mediator is ready to listen. Paste your thought on the left.</p>
+      ) : (
+        <section className={styles.resultSection}>
+          <div className={styles.cardsWrapper}>
+            <div className={`${styles.resultCard} ${styles.emotionCard}`}>
+              <h3>What you're feeling</h3>
+              <p>{result.emotion}</p>
             </div>
-          )}
-          {loading && (
-            <div className={styles.loadingState}>
-              <div className={styles.loadingSpinner} />
-              <p>Analyzing sentiment and facts...</p>
-            </div>
-          )}
-          {result && (
-            <div className={styles.resultContentWrapper}>
-              <div className={styles.resultSection}>
-                <h2 className={`${styles.resultTitle} ${styles.neutral}`}>
-                  <span>✨</span> Fact-Check & Translation
-                </h2>
-                <div className={styles.resultContent}>
-                  {result.neutralTranslation}
-                </div>
+            
+            <div className={`${styles.resultCard} ${styles.translationCard}`}>
+              <div className={styles.translationHeader}>
+                <h3>A calmer way to say it</h3>
+                <button 
+                  className={styles.copyBtn} 
+                  onClick={handleCopy}
+                  title="Copy to clipboard"
+                >
+                  {copied ? <Check strokeWidth={2} className={styles.checkIcon} /> : <Copy strokeWidth={2} className={styles.copyIcon} />}
+                  <span>{copied ? "Copied" : "Copy"}</span>
+                </button>
               </div>
-
-              {result.distortions && result.distortions.length > 0 && (
-                <div className={styles.resultSection}>
-                  <h2 className={`${styles.resultTitle} ${styles.distortions}`}>
-                    <span>🔍</span> Cognitive Distortions Flagged
-                  </h2>
-                  <ul className={styles.distortionsList}>
-                    {result.distortions.map((d: Distortion, index: number) => (
-                      <li key={index} className={styles.distortionItem}>
-                        <div className={styles.distortionName}>{d.name}</div>
-                        <div className={styles.distortionDesc}>{d.explanation}</div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <textarea 
+                className={styles.editTranslation} 
+                value={result.translation}
+                onChange={(e) => setResult({ ...result, translation: e.target.value })}
+              />
             </div>
-          )}
+          </div>
+          
+          <div className={styles.actions}>
+            <button className={styles.outlineBtn} onClick={() => { setResult(null); setMessage(""); }}>
+              Start over
+            </button>
+          </div>
         </section>
-      </div>
+      )}
     </main>
   );
 }
