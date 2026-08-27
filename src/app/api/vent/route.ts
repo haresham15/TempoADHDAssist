@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@/lib/supabase/server";
 import { parseJsonFromLLM } from "@/lib/utils";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -53,10 +54,30 @@ Example output format:
     const result = await model.generateContent([prompt, audioPart]);
     const responseText = result.response.text();
     const parsed = parseJsonFromLLM(responseText);
+    
+    const finalReply = parsed.reply || "I hear you. It is okay to feel this way.";
+    const finalTranscript = parsed.transcript || "";
+    
+    if (finalTranscript) {
+      const supabase = await createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { error: dbError } = await supabase
+        .from("vent_logs")
+        .insert([{ 
+          transcript: finalTranscript, 
+          ai_reply: finalReply,
+          user_id: session?.user?.id || null
+        }]);
+        
+      if (dbError) {
+        console.error("Failed to save to Supabase:", dbError);
+      }
+    }
 
     return NextResponse.json({ 
-      reply: parsed.reply || "I hear you. It is okay to feel this way.",
-      transcript: parsed.transcript || "" 
+      reply: finalReply,
+      transcript: finalTranscript
     });
 
   } catch (error) {

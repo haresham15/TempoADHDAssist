@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/server";
 import { parseJsonFromLLM } from "@/lib/utils";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -78,9 +78,16 @@ export async function POST(req: Request) {
       
       // Save to Supabase
       if (steps.length > 0) {
+        const supabase = await createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
         const { error: dbError } = await supabase
           .from("task_chunks")
-          .insert([{ original_task: task, steps }]);
+          .insert([{ 
+            original_task: task, 
+            steps,
+            user_id: session?.user?.id || null
+          }]);
           
         if (dbError) {
           console.error("Failed to save to Supabase:", dbError);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/server";
 import { parseJsonFromLLM } from "@/lib/utils";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -79,12 +79,16 @@ Respond in JSON format with exactly two keys:
       
       // Save to Supabase
       if (result.translation) {
+        const supabase = await createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
         const { error: dbError } = await supabase
           .from("rsd_logs")
           .insert([{ 
             original_message: message, 
             neutral_translation: result.translation, 
-            distortions: { emotion: result.emotion } 
+            distortions: { emotion: result.emotion },
+            user_id: session?.user?.id || null
           }]);
           
         if (dbError) {
