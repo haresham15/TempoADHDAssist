@@ -31,92 +31,174 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-.deferredCard {
+.settingsCard {
   width: 100%;
   max-width: 580px;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-lg);
-  padding: 2.5rem 2rem;
+  padding: 2.2rem 2rem;
   box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
+  gap: 1.75rem;
+  animation: fadeInUp 0.5s var(--easing) forwards;
+  margin-bottom: 5rem;
+}
+
+.headerArea {
+  display: flex;
   align-items: center;
-  text-align: center;
-  gap: 1.25rem;
-  animation: fadeInUp 0.6s var(--easing) forwards;
+  gap: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .iconCircle {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(181, 168, 209, 0.2);
-  color: #725F94;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(181, 168, 209, 0.25);
+  color: #5C4B7E;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.deferredTitle {
-  font-size: 1.4rem;
-  font-weight: 500;
+:global([data-theme="dark"]) .iconCircle {
+  color: #EDE6FA;
+  background: rgba(195, 182, 222, 0.2);
+}
+
+.settingsTitle {
+  font-size: 1.35rem;
+  font-weight: 600;
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 0.2rem 0;
 }
 
-.deferredText {
-  font-size: 1rem;
-  line-height: 1.6;
+.settingsSubtitle {
+  font-size: 0.88rem;
   color: var(--text-secondary);
   margin: 0;
-  max-width: 480px;
+  line-height: 1.4;
 }
 
-.featureList {
+.settingGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  width: 100%;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.4);
-  padding: 1.25rem;
-  border-radius: var(--radius-md);
+  gap: 0.65rem;
+}
+
+.settingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.settingLabel {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settingHint {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.segmentedControl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 0.35rem;
+  border-radius: 14px;
   border: 1px solid var(--border-hairline);
 }
 
-@media (prefers-color-scheme: dark) {
-  .featureList {
-    background: rgba(0, 0, 0, 0.2);
-  }
+:global([data-theme="dark"]) .segmentedControl {
+  background: rgba(0, 0, 0, 0.25);
 }
 
-.featureItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: 0.92rem;
-  line-height: 1.5;
+.segmentBtn {
+  flex: 1;
+  min-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmentBtn:hover {
   color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
 }
 
-.featureIcon {
+.segmentBtn.segmentActive {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-hairline);
+}
+
+:global([data-theme="dark"]) .segmentBtn.segmentActive {
+  background: #2C333A;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.checkMarker {
   color: var(--primary-sage);
-  flex-shrink: 0;
-  margin-top: 0.15rem;
+  margin-left: 0.15rem;
 }
 
-.featureItem code {
-  background: rgba(0, 0, 0, 0.06);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  font-size: 0.85em;
+.nameInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1rem;
+  transition: border-color 0.2s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  .featureItem code {
-    background: rgba(255, 255, 255, 0.1);
-  }
+.nameInputWrapper:focus-within {
+  border-color: var(--module-lavender);
+  box-shadow: 0 0 0 3px rgba(181, 168, 209, 0.25);
+}
+
+.nameIcon {
+  color: var(--text-secondary);
+}
+
+.nameInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.privacyNote {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-hairline);
 }
 
 .homeBtn {

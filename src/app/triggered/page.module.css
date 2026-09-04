@@ -70,23 +70,82 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.1rem;
+}
+
+.safeZoneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(140, 175, 149, 0.18);
+  border: 1px solid rgba(140, 175, 149, 0.35);
+  color: var(--text-primary);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  align-self: flex-start;
+  margin-bottom: 0.2rem;
+}
+
+.shieldIcon {
+  color: #3B6849;
+  flex-shrink: 0;
+}
+
+:global([data-theme="dark"]) .shieldIcon {
+  color: #9DBFA3;
 }
 
 .textareaWrapper {
   width: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.textareaHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.25rem;
+}
+
+.textareaHint {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pasteBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(181, 168, 209, 0.22);
+  border: 1px solid rgba(181, 168, 209, 0.45);
+  color: var(--text-primary);
+  padding: 0.22rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pasteBtn:hover {
+  background: rgba(181, 168, 209, 0.38);
+  transform: translateY(-1px);
 }
 
 .textarea {
   width: 100%;
-  min-height: 210px;
+  min-height: 190px;
   background: rgba(181, 168, 209, 0.09); /* Lavender tint */
-  border: 1px solid rgba(181, 168, 209, 0.35);
+  border: 1.5px solid rgba(181, 168, 209, 0.4);
   border-radius: var(--radius-lg); /* 24px */
-  padding: 1.5rem;
-  padding-bottom: 2.5rem;
-  font-size: 1.125rem;
+  padding: 1.25rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   color: var(--text-primary);
   resize: none;
@@ -105,14 +164,64 @@
   box-shadow: 0 0 0 3px rgba(181, 168, 209, 0.25);
 }
 
-.charCount {
-  position: absolute;
-  bottom: 0.9rem;
-  right: 1.25rem;
-  font-size: 0.82rem;
+.textareaFooterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.4rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
-  opacity: 0.75;
-  pointer-events: none;
+}
+
+.shortcutHint {
+  opacity: 0.8;
+}
+
+.charCount {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+/* ADHD Quick Starter Chips */
+.startersWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.startersTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.starterChip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--easing);
+  text-align: left;
+}
+
+.starterChip:hover {
+  border-color: var(--module-lavender);
+  background: rgba(181, 168, 209, 0.18);
+  transform: translateY(-1px);
 }
 
 .tryToggleRow {

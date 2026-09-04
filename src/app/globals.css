@@ -21,10 +21,41 @@
   --radius-md: 16px;
   --easing: cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  /* Intent Card Theming Tokens - Light */
+  --card-triggered-bg: #FAF7FC;
+  --card-triggered-border: rgba(181, 168, 209, 0.55);
+  --card-triggered-hover: #F4EEF8;
+  --card-triggered-title: #2D2540;
+  --card-triggered-desc: #5C5275;
+  --card-triggered-icon: #6F5993;
+  --card-triggered-icon-bg: rgba(181, 168, 209, 0.25);
+  --badge-flagship-bg: rgba(181, 168, 209, 0.35);
+  --badge-flagship-text: #443663;
+
+  --card-overwhelm-bg: #F3F7F4;
+  --card-overwhelm-border: rgba(140, 175, 149, 0.45);
+  --card-overwhelm-hover: #ECF3EE;
+  --card-overwhelm-title: #1B3322;
+  --card-overwhelm-desc: #415B48;
+  --card-overwhelm-icon: #3B6849;
+  --card-overwhelm-icon-bg: rgba(88, 127, 99, 0.18);
+  --badge-sage-bg: rgba(140, 175, 149, 0.3);
+  --badge-sage-text: #23422A;
+
+  --card-vent-bg: #FCF5F2;
+  --card-vent-border: rgba(232, 180, 160, 0.5);
+  --card-vent-hover: #F7EDE8;
+  --card-vent-title: #3E2319;
+  --card-vent-desc: #69483C;
+  --card-vent-icon: #995941;
+  --card-vent-icon-bg: rgba(179, 125, 102, 0.18);
+  --badge-blush-bg: rgba(232, 180, 160, 0.35);
+  --badge-blush-text: #5E3324;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     /* V2 Color System - Dark Mode ("Low-Stim Night") */
     --bg-base: #1C2126; 
     --bg-surface: #262B31;
@@ -41,7 +72,136 @@
     --border-hairline: #353A40;
     
     --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    /* Intent Card Theming Tokens - Dark */
+    --card-triggered-bg: #241F2E;
+    --card-triggered-border: rgba(195, 182, 222, 0.35);
+    --card-triggered-hover: #2C2638;
+    --card-triggered-title: #F5F2FC;
+    --card-triggered-desc: #C6BFD9;
+    --card-triggered-icon: #DDD5ED;
+    --card-triggered-icon-bg: rgba(195, 182, 222, 0.2);
+    --badge-flagship-bg: rgba(195, 182, 222, 0.25);
+    --badge-flagship-text: #EDE6FA;
+
+    --card-overwhelm-bg: #1B241F;
+    --card-overwhelm-border: rgba(157, 191, 163, 0.3);
+    --card-overwhelm-hover: #212D26;
+    --card-overwhelm-title: #EFF7F2;
+    --card-overwhelm-desc: #B3CCBB;
+    --card-overwhelm-icon: #B2D6B9;
+    --card-overwhelm-icon-bg: rgba(157, 191, 163, 0.18);
+    --badge-sage-bg: rgba(157, 191, 163, 0.25);
+    --badge-sage-text: #DCF5E3;
+
+    --card-vent-bg: #281E1B;
+    --card-vent-border: rgba(239, 195, 178, 0.3);
+    --card-vent-hover: #322522;
+    --card-vent-title: #FFF3EE;
+    --card-vent-desc: #DFC0B5;
+    --card-vent-icon: #F8CFC3;
+    --card-vent-icon-bg: rgba(239, 195, 178, 0.18);
+    --badge-blush-bg: rgba(239, 195, 178, 0.25);
+    --badge-blush-text: #FFE2D9;
   }
+}
+
+[data-theme="dark"] {
+  --bg-base: #1C2126; 
+  --bg-surface: #262B31;
+  
+  --primary-sage: #9DBFA3; 
+  --secondary-blue: #8FB8D6;
+  
+  --module-lavender: #C3B6DE;
+  --module-blush: #EFC3B2;
+  
+  --text-primary: #EDEAE2;
+  --text-secondary: #A9AFA9;
+  
+  --border-hairline: #353A40;
+  
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  /* Intent Card Theming Tokens - Dark */
+  --card-triggered-bg: #241F2E;
+  --card-triggered-border: rgba(195, 182, 222, 0.35);
+  --card-triggered-hover: #2C2638;
+  --card-triggered-title: #F5F2FC;
+  --card-triggered-desc: #C6BFD9;
+  --card-triggered-icon: #DDD5ED;
+  --card-triggered-icon-bg: rgba(195, 182, 222, 0.2);
+  --badge-flagship-bg: rgba(195, 182, 222, 0.25);
+  --badge-flagship-text: #EDE6FA;
+
+  --card-overwhelm-bg: #1B241F;
+  --card-overwhelm-border: rgba(157, 191, 163, 0.3);
+  --card-overwhelm-hover: #212D26;
+  --card-overwhelm-title: #EFF7F2;
+  --card-overwhelm-desc: #B3CCBB;
+  --card-overwhelm-icon: #B2D6B9;
+  --card-overwhelm-icon-bg: rgba(157, 191, 163, 0.18);
+  --badge-sage-bg: rgba(157, 191, 163, 0.25);
+  --badge-sage-text: #DCF5E3;
+
+  --card-vent-bg: #281E1B;
+  --card-vent-border: rgba(239, 195, 178, 0.3);
+  --card-vent-hover: #322522;
+  --card-vent-title: #FFF3EE;
+  --card-vent-desc: #DFC0B5;
+  --card-vent-icon: #F8CFC3;
+  --card-vent-icon-bg: rgba(239, 195, 178, 0.18);
+  --badge-blush-bg: rgba(239, 195, 178, 0.25);
+  --badge-blush-text: #FFE2D9;
+}
+
+[data-theme="light"] {
+  --bg-base: #FAF6F0;
+  --bg-surface: #F3EFE6;
+  
+  --primary-sage: #8CAF95;
+  --secondary-blue: #7EA3C4;
+  
+  --module-lavender: #B5A8D1;
+  --module-blush: #E8B4A0;
+  
+  --text-primary: #3A3D3A;
+  --text-secondary: #6B6F6B;
+  
+  --border-hairline: #E5E0D5;
+  
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  /* Intent Card Theming Tokens - Light */
+  --card-triggered-bg: #FAF7FC;
+  --card-triggered-border: rgba(181, 168, 209, 0.55);
+  --card-triggered-hover: #F4EEF8;
+  --card-triggered-title: #2D2540;
+  --card-triggered-desc: #5C5275;
+  --card-triggered-icon: #6F5993;
+  --card-triggered-icon-bg: rgba(181, 168, 209, 0.25);
+  --badge-flagship-bg: rgba(181, 168, 209, 0.35);
+  --badge-flagship-text: #443663;
+
+  --card-overwhelm-bg: #F3F7F4;
+  --card-overwhelm-border: rgba(140, 175, 149, 0.45);
+  --card-overwhelm-hover: #ECF3EE;
+  --card-overwhelm-title: #1B3322;
+  --card-overwhelm-desc: #415B48;
+  --card-overwhelm-icon: #3B6849;
+  --card-overwhelm-icon-bg: rgba(88, 127, 99, 0.18);
+  --badge-sage-bg: rgba(140, 175, 149, 0.3);
+  --badge-sage-text: #23422A;
+
+  --card-vent-bg: #FCF5F2;
+  --card-vent-border: rgba(232, 180, 160, 0.5);
+  --card-vent-hover: #F7EDE8;
+  --card-vent-title: #3E2319;
+  --card-vent-desc: #69483C;
+  --card-vent-icon: #995941;
+  --card-vent-icon-bg: rgba(179, 125, 102, 0.18);
+  --badge-blush-bg: rgba(232, 180, 160, 0.35);
+  --badge-blush-text: #5E3324;
 }
 
 html, body {
@@ -113,6 +273,25 @@ body::after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Manual Motion Setting Override */
+[data-motion="reduced"] *, 
+[data-motion="reduced"] ::before, 
+[data-motion="reduced"] ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ADHD Typography Scaling & Readability */
+[data-textsize="1"] {
+  font-size: 17px;
+}
+
+[data-textsize="2"] {
+  font-size: 18.5px;
 }
 
 /* Generic Layout Containers */

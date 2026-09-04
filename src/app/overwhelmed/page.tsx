@@ -6,18 +6,48 @@ import { useTempo } from "@/lib/TempoContext";
 import { ArrowLeft, Check, HeartHandshake, Zap, Bookmark } from "lucide-react";
 import styles from "./page.module.css";
 
+const TASK_STARTERS = [
+  "🧹 Clear desk / organize room",
+  "📧 Reply to that overdue email",
+  "📝 Start work or study project",
+  "🎒 Pack and prep for tomorrow",
+];
+
 export default function Overwhelmed() {
   const router = useRouter();
-  const { ventContext } = useTempo();
+  const { ventContext, sound } = useTempo();
   const [task, setTask] = useState(ventContext || "");
   const [steps, setSteps] = useState<string[]>([]);
   const [energyLevel, setEnergyLevel] = useState("Low");
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [focusMode, setFocusMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isCrisis, setIsCrisis] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const playCalmTone = () => {
+    if (!sound) return;
+    try {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
+    } catch {
+      // Audio context disabled or blocked
+    }
+  };
 
   const handleChunkTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +80,6 @@ export default function Overwhelmed() {
 
       setSteps(data.steps || []);
       if (data.energyLevel) setEnergyLevel(data.energyLevel);
-      // Ephemeral by default: no auto-save
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
@@ -69,6 +98,7 @@ export default function Overwhelmed() {
         next.delete(index);
       } else {
         next.add(index);
+        playCalmTone();
       }
       return next;
     });
@@ -104,9 +134,14 @@ export default function Overwhelmed() {
     setCompletedSteps(new Set());
     setError("");
     setSaved(false);
+    setFocusMode(false);
   };
 
   const allCompleted = steps.length > 0 && completedSteps.size === steps.length;
+  const progressPercent = steps.length > 0 ? Math.round((completedSteps.size / steps.length) * 100) : 0;
+  
+  // Find first uncompleted step index for focus mode
+  const currentStepIndex = steps.findIndex((_, i) => !completedSteps.has(i));
 
   return (
     <main className={`page-container ${styles.container}`}>
@@ -175,43 +210,97 @@ export default function Overwhelmed() {
               {loading ? <span className={styles.pulseText}>Breaking it down...</span> : "Break it down"}
             </button>
           </form>
+
+          {/* Quick Starters to bypass blank-page freeze */}
+          <div className={styles.startersWrapper}>
+            <span className={styles.startersTitle}>Common ADHD Task Starters:</span>
+            <div className={styles.starterChipsRow}>
+              {TASK_STARTERS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={styles.starterChip}
+                  onClick={() => setTask(s.replace(/^[^\w\s]+\s*/, ""))}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       ) : !allCompleted ? (
         /* 3. Steps View */
         <section className={styles.stepsContainer}>
           <div className={styles.stepsHeader}>
-            <span className={styles.energyBadge}>
-              <Zap size={13} /> {energyLevel} Energy Required
-            </span>
+            <div className={styles.stepsHeaderLeft}>
+              <span className={styles.energyBadge}>
+                <Zap size={13} /> {energyLevel} Energy Required
+              </span>
+              <button
+                type="button"
+                className={`${styles.modeToggleBtn} ${focusMode ? styles.modeActive : ""}`}
+                onClick={() => setFocusMode(!focusMode)}
+                aria-label={focusMode ? "Switch to all steps list" : "Switch to single step focus mode"}
+              >
+                {focusMode ? "Show All Steps" : "🎯 One Step at a Time"}
+              </button>
+            </div>
             <span className={styles.stepProgress}>
-              {completedSteps.size} of {steps.length} steps done
+              {completedSteps.size} of {steps.length} done ({progressPercent}%)
             </span>
           </div>
 
-          {steps.map((step: string, index: number) => {
-            const isCompleted = completedSteps.has(index);
-            return (
-              <div 
-                key={index} 
-                className={`${styles.stepCard} ${isCompleted ? styles.completedCard : ""}`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <button 
-                  type="button"
-                  className={`${styles.checkbox} ${isCompleted ? styles.checked : ""}`}
-                  onClick={() => toggleStep(index)}
-                  aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
-                >
-                  {isCompleted && <Check strokeWidth={3} className={styles.checkIcon} />}
-                </button>
-                <div className={styles.stepText}>
-                  {index === 0 && <span className={styles.gatewayLabel}>Gateway Step: </span>}
-                  {step}
-                </div>
+          {/* Progress Bar */}
+          <div className={styles.progressBarTrack} role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
+            <div className={styles.progressBarFill} style={{ width: `${progressPercent}%` }} />
+          </div>
+
+          {focusMode && currentStepIndex !== -1 ? (
+            /* Single-Step Focus Mode Spotlight */
+            <div className={styles.focusSpotlightCard}>
+              <div className={styles.focusStepBadge}>
+                <span>Step {currentStepIndex + 1} of {steps.length}</span>
+                {currentStepIndex === 0 && <span className={styles.gatewayPill}>Gateway Step</span>}
               </div>
-            );
-          })}
+              <h3 className={styles.focusStepTitle}>{steps[currentStepIndex]}</h3>
+              <p className={styles.focusStepHint}>Don&apos;t think about the rest. Just take this single micro-action.</p>
+              <button
+                type="button"
+                className={styles.focusCompleteBtn}
+                onClick={() => toggleStep(currentStepIndex)}
+              >
+                <Check size={18} strokeWidth={2.5} />
+                <span>Done! Next micro-step</span>
+              </button>
+            </div>
+          ) : (
+            /* All Steps List */
+            steps.map((step: string, index: number) => {
+              const isCompleted = completedSteps.has(index);
+              return (
+                <div 
+                  key={index} 
+                  className={`${styles.stepCard} ${isCompleted ? styles.completedCard : ""}`}
+                  style={{ animationDelay: `${index * 0.08}s` }}
+                >
+                  <button 
+                    type="button"
+                    className={`${styles.checkbox} ${isCompleted ? styles.checked : ""}`}
+                    onClick={() => toggleStep(index)}
+                    aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
+                  >
+                    {isCompleted && <Check strokeWidth={3} className={styles.checkIcon} />}
+                  </button>
+                  <div className={styles.stepText}>
+                    {index === 0 && <span className={styles.gatewayLabel}>Gateway Step: </span>}
+                    {step}
+                  </div>
+                </div>
+              );
+            })
+          )}
 
           <div className={styles.taskActions}>
             <button 
@@ -234,7 +323,7 @@ export default function Overwhelmed() {
             </button>
 
             <button 
-              type="button"
+              type="button" 
               className={styles.outlineBtn} 
               onClick={handleReset}
             >
@@ -245,14 +334,14 @@ export default function Overwhelmed() {
       ) : (
         /* 4. Completion View */
         <section className={styles.successContainer}>
-          <h2>That&apos;s the whole thing, done.</h2>
-          <p className={styles.successSub}>You cut through the paralysis and finished every step.</p>
+          <h2>That&apos;s the whole thing, done! 🎉</h2>
+          <p className={styles.successSub}>You cut through the paralysis and finished every single micro-action.</p>
           <button 
             type="button"
             className={styles.outlineBtn} 
             onClick={handleReset}
           >
-            Start something else
+            Break down something else
           </button>
         </section>
       )}

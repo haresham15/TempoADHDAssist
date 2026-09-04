@@ -13,10 +13,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { audio, mimeType, save, transcript: explicitTranscript, reply: explicitReply } = await req.json();
+    const body = await req.json();
+    const { audio, mimeType, text, save, transcript: explicitTranscript, reply: explicitReply } = body;
 
-    // Dedicated save action if requested
-    if (save && explicitTranscript) {
+    // 1. Save vent reflection (opt-in)
+    if (save) {
       try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
         const { error: dbError } = await supabase
           .from("vent_logs")
           .insert([{ 
-            transcript: explicitTranscript, 
+            transcript: explicitTranscript || text, 
             ai_reply: explicitReply || "Reflected session",
             user_id: user?.id || null
           }]);
@@ -41,11 +42,52 @@ export async function POST(req: Request) {
       }
     }
 
-    if (!audio || !mimeType) {
-      return NextResponse.json({ error: "Audio data is required" }, { status: 400 });
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY_TEMPO;
+
+    // 2. Text-based Vent (Sensory / Accessibility Option)
+    if (text && typeof text === "string") {
+      const trimmed = text.trim();
+      if (!trimmed) {
+        return NextResponse.json({ error: "Text is required" }, { status: 400 });
+      }
+
+      if (checkSafety(trimmed).isCrisis) {
+        return NextResponse.json({ isCrisis: true });
+      }
+
+      let finalReply = "I hear you. It is completely understandable to feel this way right now. Take a slow, gentle breath; you are doing the best you can.";
+      if (GEMINI_API_KEY) {
+        try {
+          const prompt = `You are an empathetic, reflective listening assistant for someone experiencing ADHD emotional burnout.
+The user wrote: "${trimmed.replace(/"/g, '\\"')}"
+Provide a short, validating, empathetic response (max 2 sentences). Do NOT give unsolicited advice, diagnoses, or clinical therapy instructions. Focus only on validating their feeling with warmth, calmness, and space. Return only the response text.`;
+
+          const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+              }),
+            }
+          );
+          if (geminiRes.ok) {
+            const gData = await geminiRes.json();
+            const textContent = gData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (textContent) finalReply = textContent;
+          }
+        } catch (e) {
+          console.error("Gemini text vent error:", e);
+        }
+      }
+
+      return NextResponse.json({ transcript: trimmed, reply: finalReply });
     }
 
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY_TEMPO;
+    if (!audio || !mimeType) {
+      return NextResponse.json({ error: "Audio or text data is required" }, { status: 400 });
+    }
 
     let finalTranscript = "I am feeling overwhelmed and needed a quiet moment to vent.";
     let finalReply = "I hear you. It is completely understandable to feel this way right now. Take a slow, gentle breath; you are doing the best you can.";

@@ -25,6 +25,114 @@
   color: var(--text-secondary);
 }
 
+.breathBarWrapper {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.startBreathBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(140, 175, 149, 0.18);
+  border: 1px solid rgba(140, 175, 149, 0.35);
+  color: var(--text-primary);
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--easing);
+}
+
+.startBreathBtn:hover {
+  background: rgba(140, 175, 149, 0.28);
+  transform: translateY(-1px);
+}
+
+.windIcon {
+  color: #5B8B67;
+}
+
+:global([data-theme="dark"]) .windIcon {
+  color: #9DBFA3;
+}
+
+.activeBreathCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--primary-sage);
+  border-radius: 999px;
+  padding: 0.45rem 1.2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.breathCircle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-sage);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+}
+
+.breathCircle.inhale {
+  transform: scale(1.4);
+  background: #8CAF95;
+}
+
+.breathCircle.hold {
+  transform: scale(1.4);
+  background: #E3B857;
+}
+
+.breathCircle.exhale {
+  transform: scale(0.85);
+  background: #7EA3C4;
+}
+
+.breathCircle.pause {
+  transform: scale(0.85);
+  background: #B5A8D1;
+}
+
+.breathInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.breathPhaseText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.breathSecondsText {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stopBreathBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.stopBreathBtn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.06);
+}
+
 .intentList {
   display: flex;
   flex-direction: column;
@@ -58,7 +166,18 @@
 
 .cardHeaderRow {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.85;
 }
 
 .cardMainRow {
@@ -67,67 +186,62 @@
   gap: 1.1rem;
 }
 
+.cardArrow {
+  margin-left: auto;
+  color: var(--text-secondary);
+  opacity: 0.45;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.intentCard:hover .cardArrow {
+  opacity: 0.9;
+  transform: translateX(3px);
+}
+
 .flagshipBadge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(181, 168, 209, 0.35);
-  color: #4A3E66;
-  padding: 0.2rem 0.65rem;
+  background: var(--badge-flagship-bg);
+  color: var(--badge-flagship-text);
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.76rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .flagshipBadge {
-    background: rgba(181, 168, 209, 0.25);
-    color: #DDD5ED;
-  }
+  transition: all 0.2s var(--easing);
 }
 
 .featureBadgeSage {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(140, 175, 149, 0.25);
-  color: #37533E;
-  padding: 0.2rem 0.65rem;
+  background: var(--badge-sage-bg);
+  color: var(--badge-sage-text);
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .featureBadgeSage {
-    background: rgba(140, 175, 149, 0.2);
-    color: #A9D1B3;
-  }
+  transition: all 0.2s var(--easing);
 }
 
 .featureBadgeBlush {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(232, 180, 160, 0.3);
-  color: #7A4633;
-  padding: 0.2rem 0.65rem;
+  background: var(--badge-blush-bg);
+  color: var(--badge-blush-text);
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .featureBadgeBlush {
-    background: rgba(232, 180, 160, 0.2);
-    color: #ECC0AE;
-  }
+  transition: all 0.2s var(--easing);
 }
 
 .statusBadge {
@@ -142,58 +256,77 @@
   letter-spacing: 0.04em;
 }
 
-@media (prefers-color-scheme: dark) {
-  .statusBadge {
-    background: rgba(255, 255, 255, 0.08);
-  }
+/* Intent Cards powered by reactive CSS theme variables */
+.cardTriggered {
+  background: var(--card-triggered-bg);
+  border: 1.5px solid var(--card-triggered-border);
 }
 
-/* Promoted Primary Flagship Styling */
-.cardTriggered {
-  background: #EFEBF5;
-  color: var(--text-primary);
-  border: 1.5px solid rgba(181, 168, 209, 0.5);
+.cardTriggered:hover {
+  transform: translateY(-3px);
+  background: var(--card-triggered-hover);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .cardTriggered .iconWrapper {
-  color: #725F94;
-  background: rgba(181, 168, 209, 0.25);
+  color: var(--card-triggered-icon);
+  background: var(--card-triggered-icon-bg);
 }
 
-.cardPrimary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(181, 168, 209, 0.25);
-  background: color-mix(in srgb, #EFEBF5 94%, black);
+.cardTriggered .cardContent h2 {
+  color: var(--card-triggered-title);
 }
 
-/* Sidelined / Deprioritized Modules */
-.cardDeprioritized {
-  opacity: 0.85;
-  border: 1px solid var(--border-hairline);
-  filter: grayscale(0.25);
-}
-
-.cardDeprioritized:hover {
-  opacity: 1;
-  transform: translateY(-1px);
+.cardTriggered .cardContent p {
+  color: var(--card-triggered-desc);
 }
 
 .cardOverwhelm {
-  background: #EBF1ED;
-  color: var(--text-primary);
+  background: var(--card-overwhelm-bg);
+  border: 1.5px solid var(--card-overwhelm-border);
 }
+
+.cardOverwhelm:hover {
+  transform: translateY(-2px);
+  background: var(--card-overwhelm-hover);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
 .cardOverwhelm .iconWrapper {
-  color: #587F63;
-  background: rgba(88, 127, 99, 0.12);
+  color: var(--card-overwhelm-icon);
+  background: var(--card-overwhelm-icon-bg);
+}
+
+.cardOverwhelm .cardContent h2 {
+  color: var(--card-overwhelm-title);
+}
+
+.cardOverwhelm .cardContent p {
+  color: var(--card-overwhelm-desc);
 }
 
 .cardVent {
-  background: #F8ECE7;
-  color: var(--text-primary);
+  background: var(--card-vent-bg);
+  border: 1.5px solid var(--card-vent-border);
 }
+
+.cardVent:hover {
+  transform: translateY(-2px);
+  background: var(--card-vent-hover);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
 .cardVent .iconWrapper {
-  color: #B37D66;
-  background: rgba(179, 125, 102, 0.12);
+  color: var(--card-vent-icon);
+  background: var(--card-vent-icon-bg);
+}
+
+.cardVent .cardContent h2 {
+  color: var(--card-vent-title);
+}
+
+.cardVent .cardContent p {
+  color: var(--card-vent-desc);
 }
 
 .iconWrapper {
@@ -216,14 +349,14 @@
   font-size: 1.15rem;
   font-weight: 600;
   margin: 0 0 0.2rem 0;
-  color: var(--text-primary);
+  transition: color 0.2s ease;
 }
 
 .cardContent p {
   font-size: 0.88rem;
-  color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
+  transition: color 0.2s ease;
 }
 
 .intentCard:hover .iconWrapper {

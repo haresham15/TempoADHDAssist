@@ -1,14 +1,49 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { MessagesSquare, ListTree, AudioLines, Sparkles, Zap, Mic } from "lucide-react";
+import { 
+  MessagesSquare, 
+  ListTree, 
+  AudioLines, 
+  Sparkles, 
+  Zap, 
+  Mic, 
+  Clock, 
+  ChevronRight,
+  Wind
+} from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
 
 export default function Home() {
   const { userName } = useTempo();
   const router = useRouter();
+  const [breathingActive, setBreathingActive] = useState(false);
+  const [breathPhase, setBreathPhase] = useState<"Inhale" | "Hold" | "Exhale" | "Pause">("Inhale");
+  const [seconds, setSeconds] = useState(4);
+
+  useEffect(() => {
+    if (!breathingActive) return;
+
+    const interval = setInterval(() => {
+      setSeconds((prev) => {
+        if (prev > 1) return prev - 1;
+
+        // Advance phase
+        setBreathPhase((currentPhase) => {
+          if (currentPhase === "Inhale") return "Hold";
+          if (currentPhase === "Hold") return "Exhale";
+          if (currentPhase === "Exhale") return "Pause";
+          return "Inhale";
+        });
+        return 4;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [breathingActive]);
 
   return (
     <main className={`page-container ${styles.container}`}>
@@ -19,6 +54,41 @@ export default function Home() {
           {userName ? `Hi ${userName}` : "Take a breath"}
         </h1>
         <p className={styles.subtitle}>A quiet space before you react.</p>
+
+        {/* Quick Grounding Breath Prompt */}
+        <div className={styles.breathBarWrapper}>
+          {!breathingActive ? (
+            <button
+              type="button"
+              className={styles.startBreathBtn}
+              onClick={() => {
+                setBreathingActive(true);
+                setBreathPhase("Inhale");
+                setSeconds(4);
+              }}
+              aria-label="Start 4-second calming box breathing"
+            >
+              <Wind size={14} className={styles.windIcon} />
+              <span>Feeling reactive? Take a 4-second breath</span>
+            </button>
+          ) : (
+            <div className={styles.activeBreathCard} aria-live="polite">
+              <div className={`${styles.breathCircle} ${styles[breathPhase.toLowerCase()]}`} />
+              <div className={styles.breathInfo}>
+                <span className={styles.breathPhaseText}>{breathPhase}...</span>
+                <span className={styles.breathSecondsText}>{seconds}s</span>
+              </div>
+              <button
+                type="button"
+                className={styles.stopBreathBtn}
+                onClick={() => setBreathingActive(false)}
+                aria-label="Close breathing guide"
+              >
+                Done
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <div className={styles.intentList}>
@@ -27,10 +97,14 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardTriggered} ${styles.cardPrimary}`}
           onClick={() => router.push('/triggered')}
+          aria-label="I'm triggered - Pause and find calm words. Takes about 30 seconds."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.flagshipBadge}>
               <Sparkles size={12} strokeWidth={2.5} /> Flagship Buffer
+            </span>
+            <span className={styles.timeBadge}>
+              <Clock size={11} strokeWidth={2} /> ~30 sec
             </span>
           </div>
           <div className={styles.cardMainRow}>
@@ -41,6 +115,7 @@ export default function Home() {
               <h2>I&apos;m triggered</h2>
               <p>Pause, name the thinking pattern &amp; find calm words</p>
             </div>
+            <ChevronRight size={18} className={styles.cardArrow} />
           </div>
         </button>
 
@@ -49,11 +124,14 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardOverwhelm}`}
           onClick={() => router.push('/overwhelmed')}
-          aria-label="Task Chunker (Energy-Adaptive)"
+          aria-label="Task Chunker - Break down tasks into zero-friction micro-actions. Takes about 2 minutes."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeSage}>
               <Zap size={11} strokeWidth={2.5} /> Energy-Adaptive
+            </span>
+            <span className={styles.timeBadge}>
+              <Clock size={11} strokeWidth={2} /> ~2 min
             </span>
           </div>
           <div className={styles.cardMainRow}>
@@ -64,6 +142,7 @@ export default function Home() {
               <h2>I&apos;m overwhelmed</h2>
               <p>Zero-friction micro-actions tailored for ADHD executive function</p>
             </div>
+            <ChevronRight size={18} className={styles.cardArrow} />
           </div>
         </button>
 
@@ -72,11 +151,14 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardVent}`}
           onClick={() => router.push('/vent')}
-          aria-label="Voice Journal (Reflective Listening)"
+          aria-label="Voice Journal - Speak freely into a judgment-free reflective audio space. Takes about 60 seconds."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeBlush}>
               <Mic size={11} strokeWidth={2.5} /> Reflective Listening
+            </span>
+            <span className={styles.timeBadge}>
+              <Clock size={11} strokeWidth={2} /> ~60 sec
             </span>
           </div>
           <div className={styles.cardMainRow}>
@@ -87,9 +169,11 @@ export default function Home() {
               <h2>I need to vent</h2>
               <p>Speak freely into a judgment-free reflective audio space</p>
             </div>
+            <ChevronRight size={18} className={styles.cardArrow} />
           </div>
         </button>
       </div>
     </main>
   );
 }
+
