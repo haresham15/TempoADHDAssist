@@ -304,6 +304,118 @@
   gap: 0.5rem;
 }
 
+.relationshipRow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0 0.25rem;
+}
+
+.relationshipLabel {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.categoryPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.categoryPill {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:global([data-theme="dark"]) .categoryPill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+}
+
+.categoryPill:hover {
+  background: rgba(181, 168, 209, 0.18);
+  color: var(--text-primary);
+  border-color: rgba(181, 168, 209, 0.4);
+}
+
+.activeCategoryPill {
+  background: rgba(181, 168, 209, 0.32);
+  border-color: rgba(181, 168, 209, 0.7);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(181, 168, 209, 0.2);
+}
+
+:global([data-theme="dark"]) .activeCategoryPill {
+  background: rgba(181, 168, 209, 0.3);
+  border-color: rgba(181, 168, 209, 0.6);
+  color: #FFFFFF;
+}
+
+.anchorCard {
+  width: 100%;
+  background: rgba(140, 175, 149, 0.14);
+  border: 1px solid rgba(140, 175, 149, 0.35);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+:global([data-theme="dark"]) .anchorCard {
+  background: rgba(140, 175, 149, 0.16);
+  border-color: rgba(140, 175, 149, 0.35);
+}
+
+.anchorHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2D5939;
+}
+
+:global([data-theme="dark"]) .anchorHeader {
+  color: #9ED4B0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .anchorHeader {
+    color: #9ED4B0;
+  }
+}
+
+.anchorIcon {
+  color: #38764B;
+  flex-shrink: 0;
+}
+
+:global([data-theme="dark"]) .anchorIcon {
+  color: #9ED4B0;
+}
+
+.anchorText {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 .celebrationHeader {
   display: flex;
   align-items: center;

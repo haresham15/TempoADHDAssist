@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { ArrowLeft, Check, HeartHandshake, Zap, Bookmark } from "lucide-react";
+import { ArrowLeft, Check, HeartHandshake, Zap, Bookmark, Camera, Type, RefreshCw } from "lucide-react";
+import SpatialSpotlight from "@/components/SpatialSpotlight";
+import { SpatialItem } from "@/app/api/chunk-spatial/route";
+import AudioAnchorControl from "@/components/AudioAnchorControl";
+import BodyDoublingSyndicate from "@/components/BodyDoublingSyndicate";
 import styles from "./page.module.css";
-
 
 export default function Overwhelmed() {
   const router = useRouter();
   const { ventContext, sound } = useTempo();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // V4 Mode Switch & Spatial State
+  const [inputMode, setInputMode] = useState<"text" | "spatial">("text");
+  const [spatialImage, setSpatialImage] = useState<string | null>(null);
+  const [spatialItems, setSpatialItems] = useState<SpatialItem[]>([]);
+  const [spatialLoading, setSpatialLoading] = useState(false);
+  const [spatialError, setSpatialError] = useState("");
+
   const [task, setTask] = useState(ventContext || "");
   const [steps, setSteps] = useState<string[]>([]);
   const [energyLevel, setEnergyLevel] = useState("Low");
@@ -20,6 +32,53 @@ export default function Overwhelmed() {
   const [isCrisis, setIsCrisis] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSpatialLoading(true);
+    setSpatialError("");
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Data = reader.result as string;
+      setSpatialImage(base64Data);
+
+      try {
+        const res = await fetch("/api/chunk-spatial", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: base64Data,
+            mimeType: file.type || "image/jpeg",
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to analyze spatial clutter.");
+        }
+
+        setSpatialItems(data.items || []);
+      } catch (err: unknown) {
+        setSpatialError(err instanceof Error ? err.message : "Could not analyze image.");
+      } finally {
+        setSpatialLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetSpatial = () => {
+    setSpatialImage(null);
+    setSpatialItems([]);
+    setSpatialError("");
+    setSpatialLoading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const playCalmTone = () => {
     if (!sound) return;
@@ -177,39 +236,102 @@ export default function Overwhelmed() {
             </div>
           </div>
         </section>
+      ) : spatialImage && spatialItems.length > 0 ? (
+        /* V4 Spatial Spotlight View */
+        <section className={styles.stepsContainer}>
+          <div className={styles.anchorsRow}>
+            <AudioAnchorControl />
+            <BodyDoublingSyndicate />
+          </div>
+          <SpatialSpotlight
+            imageUrl={spatialImage}
+            items={spatialItems}
+            onReset={handleResetSpatial}
+          />
+        </section>
       ) : steps.length === 0 ? (
-        /* 2. Task Input View */
+        /* 2. Task Input / Spatial Upload View */
         <section className={styles.inputSection}>
           <div className={styles.introHeading}>
             <h1>Task Chunker</h1>
             <p>Break any daunting task into small, manageable micro-steps.</p>
           </div>
 
-          <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
-            <input
-              type="text"
-              className={styles.input}
-              placeholder="What task is overwhelming you right now?"
-              value={task}
-              onChange={(e) => setTask(e.target.value)}
-              disabled={loading}
-              autoFocus
-              aria-label="Task to break down"
-            />
-            <button 
-              type="submit" 
-              className={styles.submitBtn}
-              disabled={loading || !task.trim()}
+          <div className={styles.modeSwitch} role="tablist">
+            <button
+              type="button"
+              className={`${styles.modeSwitchBtn} ${inputMode === "text" ? styles.activeMode : ""}`}
+              onClick={() => setInputMode("text")}
+              role="tab"
+              aria-selected={inputMode === "text"}
             >
-              {loading ? <span className={styles.pulseText}>Breaking it down...</span> : "Break it down"}
+              ✍️ Type Task
             </button>
-          </form>
+            <button
+              type="button"
+              className={`${styles.modeSwitchBtn} ${inputMode === "spatial" ? styles.activeMode : ""}`}
+              onClick={() => setInputMode("spatial")}
+              role="tab"
+              aria-selected={inputMode === "spatial"}
+            >
+              📸 Photo Cleanup (Visual Bypass)
+            </button>
+          </div>
+
+          {inputMode === "text" ? (
+            <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="What task is overwhelming you right now?"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+                disabled={loading}
+                autoFocus
+                aria-label="Task to break down"
+              />
+              <button 
+                type="submit" 
+                className={styles.submitBtn}
+                disabled={loading || !task.trim()}
+              >
+                {loading ? <span className={styles.pulseText}>Breaking it down...</span> : "Break it down"}
+              </button>
+            </form>
+          ) : (
+            <div className={styles.inputWrapper}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageSelect}
+                className={styles.fileInputHidden}
+                id="spatial-photo-input"
+                disabled={spatialLoading}
+              />
+              <label htmlFor="spatial-photo-input" className={styles.photoUploadZone}>
+                <span className={styles.photoIcon} role="img" aria-hidden="true">📸</span>
+                <p className={styles.photoUploadPrompt}>
+                  {spatialLoading ? "Analyzing space with Computer Vision..." : "Take or upload a photo of the mess"}
+                </p>
+                <p className={styles.photoUploadSub}>
+                  No typing required. Tempo will visually spotlight one single item to tackle at a time.
+                </p>
+              </label>
+            </div>
+          )}
 
           {error && <div className={styles.error} role="alert">{error}</div>}
+          {spatialError && <div className={styles.error} role="alert">{spatialError}</div>}
         </section>
       ) : !allCompleted ? (
         /* 3. Steps View */
         <section className={styles.stepsContainer}>
+          <div className={styles.anchorsRow}>
+            <AudioAnchorControl />
+            <BodyDoublingSyndicate />
+          </div>
           <div className={styles.stepsHeader}>
             <div className={styles.stepsHeaderLeft}>
               <span className={styles.energyBadge}>

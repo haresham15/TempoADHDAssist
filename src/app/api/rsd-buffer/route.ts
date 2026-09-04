@@ -44,13 +44,33 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Model call with high-availability fallback
+    // 3. Safe-State RAG Memory Fabric Context
+    const relationshipContext = body?.relationshipContext;
+    let memoryContextPrompt = "";
+    let defaultAnchor = "";
+
+    if (relationshipContext && typeof relationshipContext === "string" && relationshipContext !== "General") {
+      const relationshipDefaults: Record<string, string> = {
+        "Boss / Colleague": "In workplace communications, brevity almost always reflects rushing between meetings, not criticism or dissatisfaction with your work.",
+        "Partner": "In close relationships, distracted or terse replies are usually signs of fatigue or external stress, not a withdrawal of affection.",
+        "Friend": "Friends often go quiet or send short replies when overwhelmed by their own obligations, not because they are pulling away from you.",
+        "Family": "Family members often communicate in blunt shorthand habits without polish, without intending harm or rejection."
+      };
+      defaultAnchor = relationshipDefaults[relationshipContext] || "Remember that brevity or delayed replies are usually about the other person's bandwidth, not their feelings toward you.";
+      memoryContextPrompt = `\nRELATIONSHIP CONTEXT MEMORY:
+The communication is with someone in the category: "${relationshipContext}".
+Grounded historical truth: "${defaultAnchor}"
+Include a 1-sentence "relationshipAnchor" in your JSON output grounded in this objective context to dismantle worst-case assumptions.`;
+    }
+
+    // 4. Model call with high-availability fallback
     const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY_TEMPO;
 
     let emotion = "";
     let pattern = "";
     let translation = "";
+    let relationshipAnchor: string | null = null;
 
     // A. Primary: Try DeepSeek
     if (DEEPSEEK_API_KEY) {
@@ -66,11 +86,12 @@ export async function POST(req: Request) {
             messages: [
               {
                 role: "system",
-                content: `You are an empathetic communication coach. The user is experiencing Rejection Sensitive Dysphoria (RSD) after reading or drafting a high-emotion message.
-Respond in JSON format with exactly three keys:
-1. "emotion": A warm, validating, one-line reflection of the feeling the user is experiencing. Do not use clinical, diagnostic, or therapeutic jargon. (e.g., "It makes complete sense that you feel hurt and dismissed by that brief reply.")
-2. "pattern": A concise (under 10 words), plain-language name for the thinking pattern at work. (e.g., "Your brain jumped to the worst-case version", "Filling in silence with perceived anger", "Treating brevity as rejection")
-3. "translation": A calmer, clearer, editable rewording of the message that communicates effectively while maintaining calm boundaries.`
+                content: `You are an empathetic communication coach. The user is experiencing Rejection Sensitive Dysphoria (RSD) after reading or drafting a high-emotion message.${memoryContextPrompt}
+Respond in JSON format with:
+1. "emotion": A warm, validating, one-line reflection of the feeling the user is experiencing. Do not use clinical, diagnostic, or therapeutic jargon.
+2. "pattern": A concise (under 10 words), plain-language name for the thinking pattern at work. (e.g., "Your brain jumped to the worst-case version")
+3. "translation": A calmer, clearer, editable rewording of the message that communicates effectively while maintaining calm boundaries.
+4. "relationshipAnchor": A 1-sentence objective grounding reminder based on the relationship history to dismantle catastrophic fear (or null if no relationship context was given).`
               },
               { role: "user", content: message }
             ],
@@ -87,6 +108,7 @@ Respond in JSON format with exactly three keys:
           if (rsdData.emotion) emotion = rsdData.emotion.trim();
           if (rsdData.pattern) pattern = rsdData.pattern.trim();
           if (rsdData.translation) translation = rsdData.translation.trim();
+          if (rsdData.relationshipAnchor) relationshipAnchor = rsdData.relationshipAnchor.trim();
         } else {
           console.warn(`DeepSeek returned ${response.status}. Attempting Gemini fallback.`);
         }
@@ -98,14 +120,15 @@ Respond in JSON format with exactly three keys:
     // B. Secondary Fallback: Gemini 3.5 Flash Lite
     if ((!emotion || !translation) && GEMINI_API_KEY) {
       try {
-        const geminiPrompt = `You are an empathetic communication coach for someone experiencing ADHD Rejection Sensitive Dysphoria.
+        const geminiPrompt = `You are an empathetic communication coach for someone experiencing ADHD Rejection Sensitive Dysphoria.${memoryContextPrompt}
 Analyze this message: "${message}"
 
 Output ONLY a JSON object with this exact schema:
 {
   "emotion": "A warm, validating, one-line reflection of what they might be feeling without clinical jargon",
   "pattern": "A concise under-10-word name for the thinking pattern at work (e.g. Your brain jumped to the worst-case version)",
-  "translation": "A calmer, clearer rewording that preserves calm boundaries"
+  "translation": "A calmer, clearer rewording that preserves calm boundaries",
+  "relationshipAnchor": "A 1-sentence objective grounding reminder based on relationship history, or null"
 }`;
 
         const geminiRes = await fetch(
@@ -131,6 +154,7 @@ Output ONLY a JSON object with this exact schema:
             if (parsed.emotion) emotion = parsed.emotion.trim();
             if (parsed.pattern) pattern = parsed.pattern.trim();
             if (parsed.translation) translation = parsed.translation.trim();
+            if (parsed.relationshipAnchor) relationshipAnchor = parsed.relationshipAnchor.trim();
           }
         } else {
           console.warn("Gemini fallback returned non-200:", geminiRes.status);
@@ -150,12 +174,16 @@ Output ONLY a JSON object with this exact schema:
     if (!translation) {
       translation = "I received your note and want to make sure I understand where you're coming from. Could we touch base briefly when you have a moment?";
     }
+    if (!relationshipAnchor && defaultAnchor) {
+      relationshipAnchor = defaultAnchor;
+    }
 
     return NextResponse.json({
       isCrisis: false,
       emotion,
       pattern,
-      translation
+      translation,
+      relationshipAnchor: relationshipAnchor || null
     });
 
   } catch (err: unknown) {

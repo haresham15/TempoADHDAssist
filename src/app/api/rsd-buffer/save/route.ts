@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { originalMessage, translation, pattern, emotion, userReframe } = body;
+    const { originalMessage, translation, pattern, emotion, userReframe, relationshipCategory } = body;
 
     if (!originalMessage || typeof originalMessage !== "string" || !originalMessage.trim()) {
       return NextResponse.json({ error: "Original message is required." }, { status: 400 });
@@ -30,12 +30,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Content exceeds maximum length." }, { status: 400 });
     }
 
+    const allowedCategories = ["general", "boss_colleague", "partner", "friend", "family"];
+    const category = typeof relationshipCategory === "string" && allowedCategories.includes(relationshipCategory.toLowerCase())
+      ? relationshipCategory.toLowerCase()
+      : "general";
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     const distortionsPayload: Record<string, string> = {
       emotion: emotion || "Reflected emotion",
-      pattern: pattern || "Thinking pattern"
+      pattern: pattern || "Thinking pattern",
+      relationship_category: category
     };
 
     if (userReframe && typeof userReframe === "string" && userReframe.trim()) {
@@ -48,6 +54,7 @@ export async function POST(req: Request) {
         {
           original_message: trimmedOriginal,
           neutral_translation: trimmedTranslation,
+          relationship_category: category,
           distortions: distortionsPayload,
           user_id: user?.id || null
         }

@@ -10,7 +10,8 @@ import {
   Bookmark, 
   HeartHandshake, 
   Sparkles,
-  Clipboard
+  Clipboard,
+  Anchor
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -19,6 +20,7 @@ interface RsdResult {
   emotion: string;
   pattern: string;
   translation: string;
+  relationshipAnchor?: string;
   userReframe?: string;
 }
 
@@ -27,6 +29,7 @@ const MAX_CHARS = 3000;
 export default function Triggered() {
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const [relationshipCategory, setRelationshipCategory] = useState("general");
   const [tryFirst, setTryFirst] = useState(false);
   const [userDraft, setUserDraft] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +67,10 @@ export default function Triggered() {
       const response = await fetch("/api/rsd-buffer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ 
+          message: trimmed,
+          relationshipContext: relationshipCategory !== "general" ? relationshipCategory : undefined
+        }),
       });
 
       const data = await response.json();
@@ -82,6 +88,7 @@ export default function Triggered() {
         emotion: data.emotion,
         pattern: data.pattern,
         translation: data.translation,
+        relationshipAnchor: data.relationshipAnchor,
         userReframe: tryFirst && userDraft.trim() ? userDraft.trim() : undefined,
       });
       // Ephemeral by default: no auto-saving to database or localStorage
@@ -118,6 +125,7 @@ export default function Triggered() {
           pattern: result.pattern,
           emotion: result.emotion,
           userReframe: result.userReframe,
+          relationshipCategory: relationshipCategory,
         }),
       });
 
@@ -139,6 +147,7 @@ export default function Triggered() {
     setIsCrisis(false);
     setMessage("");
     setUserDraft("");
+    setRelationshipCategory("general");
     setError("");
     setSaved(false);
     setCopied(false);
@@ -242,6 +251,29 @@ export default function Triggered() {
               </div>
             </div>
 
+            {/* Context: Relationship Anchor */}
+            <div className={styles.relationshipRow}>
+              <span className={styles.relationshipLabel}>Who sent this? (Optional context)</span>
+              <div className={styles.categoryPills}>
+                {[
+                  { id: "general", label: "General" },
+                  { id: "boss_colleague", label: "Work / Boss" },
+                  { id: "partner", label: "Partner" },
+                  { id: "friend", label: "Friend" },
+                  { id: "family", label: "Family" },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`${styles.categoryPill} ${relationshipCategory === cat.id ? styles.activeCategoryPill : ""}`}
+                    onClick={() => setRelationshipCategory(cat.id)}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Optional Reframe Practice */}
             <div className={styles.tryToggleRow}>
               <label className={styles.toggleLabel}>
@@ -291,6 +323,18 @@ export default function Triggered() {
               </div>
               <p className={styles.userReframeText}>
                 <strong>Your version:</strong> &ldquo;{result.userReframe}&rdquo;
+              </p>
+            </div>
+          )}
+
+          {result.relationshipAnchor && (
+            <div className={styles.anchorCard}>
+              <div className={styles.anchorHeader}>
+                <Anchor size={16} className={styles.anchorIcon} />
+                <span>Safe-State Context Anchor</span>
+              </div>
+              <p className={styles.anchorText}>
+                {result.relationshipAnchor}
               </p>
             </div>
           )}

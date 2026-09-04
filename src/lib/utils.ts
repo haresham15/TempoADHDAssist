@@ -1,11 +1,11 @@
-export function parseJsonFromLLM(content: string) {
+export function parseJsonFromLLM<T = any>(content: string): T {
   try {
     // 1. Strip markdown code fences if present
     const cleanContent = content.replace(/```json\n?|```/g, '').trim();
     
     // 2. Direct attempt
     try {
-      return JSON.parse(cleanContent);
+      return JSON.parse(cleanContent) as T;
     } catch {
       // Fall through to boundary extraction
     }

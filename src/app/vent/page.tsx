@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
 import { ArrowLeft, Mic, HeartHandshake, Check, Bookmark } from "lucide-react";
+import AudioAnchorControl from "@/components/AudioAnchorControl";
 import styles from "./page.module.css";
 
 export default function Vent() {
@@ -290,6 +291,7 @@ export default function Vent() {
       ) : !transcript && !reply ? (
         /* 2. Recording / Input View */
         <section className={styles.recordingSection}>
+          <AudioAnchorControl style={{ marginBottom: "16px" }} />
           {/* Sensory Mode Toggle: Voice vs Text */}
           <div className={styles.modeTabs}>
             <button

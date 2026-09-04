@@ -10,8 +10,11 @@ create table if not exists public.rsd_logs (
   user_id uuid references auth.users(id) on delete cascade null,
   original_message text not null,
   neutral_translation text not null,
+  relationship_category text not null default 'general',
   distortions jsonb not null default '{}'::jsonb
 );
+
+create index if not exists idx_rsd_logs_relationship on public.rsd_logs(relationship_category);
 
 -- 2. Preserved tables for active modules (Task Chunker & Voice Journal)
 create table if not exists public.task_chunks (

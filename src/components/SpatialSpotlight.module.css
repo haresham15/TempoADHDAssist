@@ -1,0 +1,212 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.imageViewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  background-color: #121518;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.baseImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Darkening and blurring backdrop over the entire photo */
+.scrimOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 18, 22, 0.65);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+
+/* The active spotlight cutout cutout box */
+.spotlightBox {
+  position: absolute;
+  border-radius: 12px;
+  border: 2.5px solid #8CAF95;
+  box-shadow: 0 0 0 9999px rgba(15, 18, 22, 0.65), 0 0 24px rgba(140, 175, 149, 0.7);
+  pointer-events: none;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 2;
+}
+
+.spotlightBeacon {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #8CAF95;
+  color: #1B241F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: pulseBeacon 2s infinite ease-in-out;
+}
+
+@keyframes pulseBeacon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.actionCard {
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stepBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #58A072;
+  background: rgba(88, 160, 114, 0.1);
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+.timeEstimate {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted, #767571);
+}
+
+.stepTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-base, #2E2D29);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.buttonRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doneButton {
+  flex: 1;
+  background: #58A072;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-md, 10px);
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.doneButton:hover {
+  background: #46885C;
+}
+
+.doneButton:active {
+  transform: scale(0.98);
+}
+
+.skipButton {
+  background: transparent;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  border-radius: var(--radius-md, 10px);
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted, #767571);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.skipButton:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+  color: var(--text-base, #2E2D29);
+}
+
+.completionCard {
+  background: var(--card-overwhelm-bg, #1B241F);
+  border: 1px solid var(--card-overwhelm-border, rgba(88, 160, 114, 0.3));
+  border-radius: var(--radius-lg, 16px);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.completionTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--card-overwhelm-title, #EFF7F2);
+  margin: 0;
+}
+
+.completionSubtitle {
+  font-size: 0.9375rem;
+  color: var(--card-overwhelm-sub, #B3CCBB);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.resetButton {
+  margin-top: 8px;
+  background: #58A072;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resetButton:hover {
+  background: #46885C;
+}
