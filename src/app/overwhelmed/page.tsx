@@ -265,7 +265,7 @@ export default function Overwhelmed() {
               role="tab"
               aria-selected={inputMode === "text"}
             >
-              ✍️ Type Task
+              Type Task
             </button>
             <button
               type="button"
@@ -274,7 +274,7 @@ export default function Overwhelmed() {
               role="tab"
               aria-selected={inputMode === "spatial"}
             >
-              📸 Photo Cleanup (Visual Bypass)
+              Photo Cleanup
             </button>
           </div>
 
@@ -311,12 +311,12 @@ export default function Overwhelmed() {
                 disabled={spatialLoading}
               />
               <label htmlFor="spatial-photo-input" className={styles.photoUploadZone}>
-                <span className={styles.photoIcon} role="img" aria-hidden="true">📸</span>
+                <Camera size={32} className={styles.photoIconSvg} />
                 <p className={styles.photoUploadPrompt}>
-                  {spatialLoading ? "Analyzing space with Computer Vision..." : "Take or upload a photo of the mess"}
+                  {spatialLoading ? "Analyzing space..." : "Take or upload a photo of the mess"}
                 </p>
                 <p className={styles.photoUploadSub}>
-                  No typing required. Tempo will visually spotlight one single item to tackle at a time.
+                  No typing required. Tempo will visually spotlight one item at a time.
                 </p>
               </label>
             </div>
@@ -334,16 +334,13 @@ export default function Overwhelmed() {
           </div>
           <div className={styles.stepsHeader}>
             <div className={styles.stepsHeaderLeft}>
-              <span className={styles.energyBadge}>
-                <Zap size={13} /> {energyLevel} Energy
-              </span>
               <button
                 type="button"
                 className={`${styles.modeToggleBtn} ${focusMode ? styles.modeActive : ""}`}
                 onClick={() => setFocusMode(!focusMode)}
                 aria-label={focusMode ? "Switch to all steps list" : "Switch to single step focus mode"}
               >
-                {focusMode ? "Show All Steps" : "🎯 One Step at a Time"}
+                {focusMode ? "Show All Steps" : "Focus Mode"}
               </button>
             </div>
             <span className={styles.stepProgress}>
@@ -433,7 +430,7 @@ export default function Overwhelmed() {
       ) : (
         /* 4. Completion View */
         <section className={styles.successContainer}>
-          <h2>That&apos;s the whole thing, done! 🎉</h2>
+          <h2>That&apos;s the whole thing, done.</h2>
           <p className={styles.successSub}>You cut through the paralysis and finished every single micro-action.</p>
           <button 
             type="button"

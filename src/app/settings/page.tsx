@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
 import { 
@@ -12,13 +13,17 @@ import {
   VolumeX, 
   Eye, 
   Check,
-  User
+  User,
+  HelpCircle,
+  Lock
 } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
+import OnboardingModal from "@/components/OnboardingModal";
 import styles from "./page.module.css";
 
 export default function Settings() {
   const router = useRouter();
+  const [showTour, setShowTour] = useState(false);
   const { 
     theme, 
     setTheme, 
@@ -204,10 +209,32 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* 6. Website Walkthrough & Tutorial */}
+        <div className={styles.settingGroup}>
+          <div className={styles.settingHeader}>
+            <span className={styles.settingLabel}>Website Walkthrough</span>
+            <span className={styles.settingHint}>Review how Tempo works, features, and core safety</span>
+          </div>
+          <button
+            type="button"
+            className={styles.tourBtn}
+            onClick={() => setShowTour(true)}
+          >
+            <HelpCircle size={15} />
+            <span>Open Website Tour</span>
+          </button>
+        </div>
+
         <div className={styles.privacyNote}>
-          🔒 Your preferences are preserved locally and synced to your encrypted private profile.
+          <Lock size={13} className={styles.privacyLockIcon} />
+          <span>Your preferences are preserved locally and synced to your encrypted private profile.</span>
         </div>
       </section>
+
+      <OnboardingModal 
+        isOpen={showTour} 
+        onClose={() => setShowTour(false)} 
+      />
     </main>
   );
 }

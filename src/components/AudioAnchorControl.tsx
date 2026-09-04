@@ -49,7 +49,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="Gentle low-frequency brown noise to block auditory overstimulation"
           aria-pressed={currentMode === "brown"}
         >
-          🌿 Brown Noise
+          Brown Noise
         </button>
         <button
           type="button"
@@ -58,7 +58,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="Subtle 65 BPM pulse to ground heart rate and stabilize pacing"
           aria-pressed={currentMode === "pulse"}
         >
-          🥁 65 BPM Pulse
+          65 BPM Pulse
         </button>
         <button
           type="button"
@@ -67,7 +67,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="432Hz harmonic warm drone for sensory grounding"
           aria-pressed={currentMode === "drone"}
         >
-          🎵 432Hz Drone
+          432Hz Drone
         </button>
       </div>
     </div>

@@ -15,6 +15,7 @@ import {
   Wind
 } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
+import OnboardingModal from "@/components/OnboardingModal";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -23,6 +24,16 @@ export default function Home() {
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathPhase, setBreathPhase] = useState<"Inhale" | "Hold" | "Exhale" | "Pause">("Inhale");
   const [seconds, setSeconds] = useState(4);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("tempo_onboarding_dismissed");
+      if (dismissed !== "true") {
+        setShowOnboarding(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!breathingActive) return;
@@ -173,6 +184,11 @@ export default function Home() {
           </div>
         </button>
       </div>
+
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+      />
     </main>
   );
 }

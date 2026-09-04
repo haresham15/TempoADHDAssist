@@ -684,8 +684,9 @@
   background: rgba(88, 160, 114, 0.04);
 }
 
-.photoIcon {
-  font-size: 2.25rem;
+.photoIconSvg {
+  color: #58A072;
+  margin-bottom: 4px;
 }
 
 .photoUploadPrompt {

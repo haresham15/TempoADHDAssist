@@ -38,9 +38,9 @@ export default function BodyDoublingSyndicate({ className = "" }: BodyDoublingSy
 
     // Subtle, occasional encouragement ripple (every ~28 seconds)
     const encouragementPhrases = [
-      "Someone just checked off a step ✨",
-      "A peer completed a micro-task 👏",
-      "Someone just started their first step 🌿",
+      "Someone just checked off a step",
+      "A peer completed a micro-task",
+      "Someone just started their first step",
     ];
 
     const rippleInterval = setInterval(() => {

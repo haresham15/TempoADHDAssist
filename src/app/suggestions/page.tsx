@@ -7,10 +7,10 @@ import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
 
 const CATEGORIES = [
-  { id: "feature", label: "💡 Feature Idea" },
-  { id: "usability", label: "🧘 Simplicity & Calm" },
-  { id: "bug", label: "🐛 Bug Report" },
-  { id: "other", label: "💭 General Thought" },
+  { id: "feature", label: "Feature Idea" },
+  { id: "usability", label: "Simplicity & Calm" },
+  { id: "bug", label: "Bug Report" },
+  { id: "other", label: "General Thought" },
 ];
 
 export default function SuggestionsPage() {

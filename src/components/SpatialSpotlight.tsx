@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle2, Check } from "lucide-react";
 import styles from "./SpatialSpotlight.module.css";
 import { SpatialItem } from "@/app/api/chunk-spatial/route";
 
@@ -23,42 +24,38 @@ export default function SpatialSpotlight({
   const currentItem = items[currentIndex];
 
   const playStepChime = () => {
-    if (typeof window === "undefined") return;
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.type = "sine";
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-      osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.12); // E5
-
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start();
       osc.stop(ctx.currentTime + 0.36);
     } catch {
-      // Audio autoplay policy fallback
+      // Ignore
     }
   };
 
   const handleDone = () => {
     playStepChime();
-    if (currentIndex + 1 < items.length) {
-      setCurrentIndex(currentIndex + 1);
+    if (currentIndex < items.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
     } else {
       setIsCompleted(true);
     }
   };
 
   const handleSkip = () => {
-    if (currentIndex + 1 < items.length) {
-      setCurrentIndex(currentIndex + 1);
+    if (currentIndex < items.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
     } else {
       setIsCompleted(true);
     }
@@ -68,10 +65,10 @@ export default function SpatialSpotlight({
     return (
       <div className={styles.container}>
         <div className={styles.completionCard}>
-          <span style={{ fontSize: "2.5rem" }} role="img" aria-label="Celebration">
-            🎉
-          </span>
-          <h3 className={styles.completionTitle}>Physical Space Cleared!</h3>
+          <div className={styles.completionIconWrapper}>
+            <CheckCircle2 size={40} className={styles.completionIcon} />
+          </div>
+          <h3 className={styles.completionTitle}>Physical Space Cleared</h3>
           <p className={styles.completionSubtitle}>
             You completed {items.length} micro-steps without formulating a single sentence of overwhelm. Take a moment to feel the difference.
           </p>
@@ -126,7 +123,8 @@ export default function SpatialSpotlight({
 
         <div className={styles.buttonRow}>
           <button type="button" onClick={handleDone} className={styles.doneButton}>
-            <span>✓ Done</span>
+            <Check size={14} />
+            <span>Done</span>
           </button>
           <button type="button" onClick={handleSkip} className={styles.skipButton}>
             Skip this item

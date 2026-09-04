@@ -179,6 +179,18 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
+.completionIconWrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(140, 175, 149, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completionIcon {
+  color: #8CAF95;
 }
 
 .completionTitle {
