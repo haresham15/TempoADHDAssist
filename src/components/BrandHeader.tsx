@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { LogOut, User as UserIcon, Sparkles } from "lucide-react";
+import { Sparkles, LogOut, User as UserIcon } from "lucide-react";
 import styles from "./BrandHeader.module.css";
 import { logout } from "@/app/login/actions";
 import PricingModal from "./PricingModal";
@@ -47,8 +47,8 @@ export default function BrandHeader() {
             <Image 
               src="/icon.png" 
               alt="Tempo Logo" 
-              width={32} 
-              height={32} 
+              width={30} 
+              height={30} 
               className={styles.logoImage}
               priority
             />
@@ -67,7 +67,7 @@ export default function BrandHeader() {
             onClick={() => setShowPricing(true)}
             title="View Tempo Plans"
           >
-            <Sparkles size={12} strokeWidth={2.5} />
+            <Sparkles size={13} strokeWidth={2.2} />
             <span>{isPlus ? "Tempo Plus" : "Plans"}</span>
           </button>
 
@@ -79,14 +79,14 @@ export default function BrandHeader() {
                 </span>
                 <form action={logout}>
                   <button type="submit" className={styles.authBtn} title="Sign out">
-                    <LogOut size={14} />
+                    <LogOut size={13} />
                     <span>Logout</span>
                   </button>
                 </form>
               </>
             ) : (
               <Link href="/login" className={styles.authBtn}>
-                <UserIcon size={14} />
+                <UserIcon size={13} />
                 <span>Sign In</span>
               </Link>
             )}

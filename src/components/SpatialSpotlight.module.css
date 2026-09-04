@@ -1,21 +1,19 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1.25rem;
   width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
 }
 
 .imageViewport {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: var(--radius-lg, 16px);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: #121518;
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1.5px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
 }
 
 .baseImage {
@@ -25,28 +23,14 @@
   display: block;
 }
 
-/* Darkening and blurring backdrop over the entire photo */
-.scrimOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 18, 22, 0.65);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  pointer-events: none;
-  transition: all 0.4s ease;
-}
-
-/* The active spotlight cutout cutout box */
+/* The active spotlight cutout box */
 .spotlightBox {
   position: absolute;
-  border-radius: 12px;
-  border: 2.5px solid #8CAF95;
-  box-shadow: 0 0 0 9999px rgba(15, 18, 22, 0.65), 0 0 24px rgba(140, 175, 149, 0.7);
+  border-radius: var(--radius-md);
+  border: 2.5px solid var(--primary-sage);
+  box-shadow: 0 0 0 9999px rgba(18, 21, 23, 0.72), 0 0 20px rgba(140, 175, 149, 0.5);
   pointer-events: none;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.3s var(--easing);
   z-index: 2;
 }
 
@@ -57,168 +41,171 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #8CAF95;
-  color: #1B241F;
+  background: var(--primary-sage);
+  color: #1A281E;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  animation: pulseBeacon 2s infinite ease-in-out;
-}
-
-@keyframes pulseBeacon {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.18);
-  }
 }
 
 .actionCard {
-  background: var(--bg-card, #FFFFFF);
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-lg, 16px);
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: all 0.2s ease;
+  gap: 1rem;
+  box-shadow: var(--shadow-soft);
 }
 
 .metaRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .stepBadge {
-  font-size: 0.75rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
+  color: #23422A;
+  background: rgba(140, 175, 149, 0.22);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #58A072;
-  background: rgba(88, 160, 114, 0.1);
-  padding: 3px 10px;
-  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stepBadge {
+    color: #DCF5E3;
+    background: rgba(157, 191, 163, 0.2);
+  }
 }
 
 .timeEstimate {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-muted, #767571);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .stepTitle {
-  font-size: 1.15rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1.35rem;
   font-weight: 600;
-  color: var(--text-base, #2E2D29);
   line-height: 1.35;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .buttonRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
 }
 
 .doneButton {
-  flex: 1;
-  background: #58A072;
-  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--primary-sage);
+  color: #1A281E;
   border: none;
-  border-radius: var(--radius-md, 10px);
-  padding: 12px 18px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.45rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.18s var(--easing);
 }
 
 .doneButton:hover {
-  background: #46885C;
-}
-
-.doneButton:active {
-  transform: scale(0.98);
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--primary-sage) 90%, black);
 }
 
 .skipButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   background: transparent;
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
-  border-radius: var(--radius-md, 10px);
-  padding: 12px 16px;
-  font-size: 0.875rem;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.15rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  color: var(--text-muted, #767571);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s var(--easing);
 }
 
 .skipButton:hover {
-  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
-  color: var(--text-base, #2E2D29);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
-.completionCard {
-  background: var(--card-overwhelm-bg, #1B241F);
-  border: 1px solid var(--card-overwhelm-border, rgba(88, 160, 114, 0.3));
-  border-radius: var(--radius-lg, 16px);
-  padding: 32px 24px;
-  text-align: center;
+.completionPanel {
+  background: rgba(227, 184, 87, 0.12);
+  border: 1.5px solid rgba(227, 184, 87, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-.completionIconWrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(140, 175, 149, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  gap: 1rem;
 }
 
 .completionIcon {
-  color: #8CAF95;
+  color: #A0720A;
+}
+
+@media (prefers-color-scheme: dark) {
+  .completionIcon {
+    color: #F0C465;
+  }
 }
 
 .completionTitle {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--card-overwhelm-title, #EFF7F2);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1.6rem;
+  font-weight: 600;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .completionSubtitle {
-  font-size: 0.9375rem;
-  color: var(--card-overwhelm-sub, #B3CCBB);
-  max-width: 420px;
-  margin: 0 auto;
+  font-size: 0.98rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  max-width: 50ch;
+  margin: 0;
 }
 
-.resetButton {
-  margin-top: 8px;
-  background: #58A072;
-  color: #FFFFFF;
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--primary-sage);
+  color: #1A281E;
   border: none;
-  border-radius: 9999px;
-  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.45rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.18s var(--easing);
+  margin-top: 0.5rem;
 }
 
-.resetButton:hover {
-  background: #46885C;
+.actionBtn:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--primary-sage) 90%, black);
 }

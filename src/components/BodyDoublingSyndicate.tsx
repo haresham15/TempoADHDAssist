@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Users } from "lucide-react";
 import styles from "./BodyDoublingSyndicate.module.css";
 
 interface BodyDoublingSyndicateProps {
@@ -36,11 +37,10 @@ export default function BodyDoublingSyndicate({ className = "" }: BodyDoublingSy
     pingPresence();
     const interval = setInterval(pingPresence, 35000);
 
-    // Subtle, occasional encouragement ripple (every ~28 seconds)
     const encouragementPhrases = [
       "Someone just checked off a step",
       "A peer completed a micro-task",
-      "Someone just started their first step",
+      "Someone started their first step",
     ];
 
     const rippleInterval = setInterval(() => {
@@ -61,13 +61,16 @@ export default function BodyDoublingSyndicate({ className = "" }: BodyDoublingSy
 
   return (
     <div className={`${styles.syndicateWrapper} ${className}`} role="status" aria-live="polite">
-      <div className={styles.pill} title="Anonymous co-working syndicate. Zero chat, zero video.">
-        <span className={styles.pulsingDot} aria-hidden="true" />
+      <div className={styles.presenceStrip} title="Anonymous co-working syndicate. Zero chat, zero video.">
+        <Users size={12} className={styles.usersIcon} />
+        <span className={styles.statusDot} aria-hidden="true" />
         <span className={styles.countText}>
-          <strong>{peerCount} people</strong> focusing alongside you
+          <span className={styles.peerNumber}>{peerCount} focusing right now</span>
+          <span className={styles.divider}>&bull;</span>
+          <span>Ambient Body Doubling</span>
         </span>
       </div>
-      {recentEvent && <div className={styles.subtleRipple}>{recentEvent}</div>}
+      {recentEvent && <div className={styles.subtleEvent}>{recentEvent}</div>}
     </div>
   );
 }

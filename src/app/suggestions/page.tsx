@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Send, CheckCircle2, MessageSquare } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
+import { ChevronLeft, MessageSquareHeart, Check, Send, RefreshCw } from "lucide-react";
 import styles from "./page.module.css";
 
 const CATEGORIES = [
@@ -66,62 +66,58 @@ export default function SuggestionsPage() {
     <main className={`page-container ${styles.container}`}>
       <BrandHeader />
 
-      <button 
-        className={styles.backButton} 
-        onClick={() => router.push("/")}
-        aria-label="Back to home"
-      >
-        <ArrowLeft className={styles.backIcon} strokeWidth={2} />
-      </button>
+      <div className={styles.topBar}>
+        <button 
+          type="button"
+          className={styles.backButton} 
+          onClick={() => router.push("/")}
+          aria-label="Back to home"
+        >
+          <ChevronLeft size={16} />
+          <span>Home</span>
+        </button>
+        <span className={styles.protocolBadge}>
+          <MessageSquareHeart size={12} strokeWidth={2.2} /> Feedback
+        </span>
+      </div>
 
       <div className={styles.contentWrapper}>
         <header className={styles.header}>
-          <div className={styles.iconBadge}>
-            <MessageSquare size={22} className={styles.headerIcon} />
-          </div>
           <h1 className={styles.title}>Suggestions &amp; Ideas</h1>
           <p className={styles.subtitle}>
-            Tempo is built to be a calm, distraction-free sanctuary. Have an idea to make it simpler, better, or gentler? We&apos;d love to hear it.
+            Help shape Tempo into a calmer, more supportive space for neurodivergent minds.
           </p>
         </header>
 
         {submitted ? (
-          <div className={styles.successCard} aria-live="polite">
+          <div className={styles.successPanel}>
             <div className={styles.successIconWrapper}>
-              <CheckCircle2 size={36} className={styles.successIcon} />
+              <Check size={24} />
             </div>
-            <h2>Thank you for your voice</h2>
-            <p>
-              Your suggestion has been received. We review every note to keep Tempo focused, minimal, and genuinely supportive for neurodivergent minds.
+            <h2 className={styles.successTitle}>Thank you for your thoughts</h2>
+            <p className={styles.successText}>
+              Your feedback directly shapes how Tempo supports emotional regulation and executive function.
             </p>
-            <div className={styles.successActions}>
-              <button 
-                type="button" 
-                className={styles.secondaryBtn}
-                onClick={() => setSubmitted(false)}
-              >
-                Send another suggestion
-              </button>
-              <button 
-                type="button" 
-                className={styles.primaryBtn}
-                onClick={() => router.push("/")}
-              >
-                Return home
-              </button>
-            </div>
+            <button 
+              type="button"
+              className={styles.actionBtn} 
+              onClick={() => setSubmitted(false)}
+            >
+              <RefreshCw size={14} />
+              <span>Send another suggestion</span>
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.form}>
-            {/* Category selection */}
-            <div className={styles.categorySection}>
-              <label className={styles.sectionLabel}>What is this about?</label>
-              <div className={styles.categoryPills}>
+            {/* Category Segment Selector */}
+            <div className={styles.fieldSection}>
+              <span className={styles.fieldLabel}>Category</span>
+              <div className={styles.categoryGrid}>
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
-                    className={`${styles.catPill} ${category === cat.id ? styles.catPillActive : ""}`}
+                    className={`${styles.catBtn} ${category === cat.id ? styles.activeCat : ""}`}
                     onClick={() => setCategory(cat.id)}
                   >
                     {cat.label}
@@ -130,33 +126,29 @@ export default function SuggestionsPage() {
               </div>
             </div>
 
-            {/* Content text */}
-            <div className={styles.inputGroup}>
-              <label htmlFor="suggestion-content" className={styles.sectionLabel}>
-                Your suggestion
-              </label>
-              <textarea
-                id="suggestion-content"
-                className={styles.textarea}
-                placeholder="What would make Tempo better or easier for you?..."
-                value={content}
-                onChange={(e) => setContent(e.target.value.slice(0, 3000))}
-                rows={5}
-                required
-                disabled={loading}
-              />
-              <div className={styles.charCount}>
-                {content.length} / 3,000
+            {/* Input Desk */}
+            <div className={styles.deskPanel}>
+              <div className={styles.deskHeader}>
+                <span className={styles.deskLabel}>Your Thoughts &amp; Recommendations</span>
               </div>
+              <textarea
+                className={styles.textarea}
+                placeholder="What feels helpful, cluttered, or missing? What would make this more comforting for you?"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={5}
+                disabled={loading}
+                required
+              />
             </div>
 
-            {/* Optional email */}
-            <div className={styles.inputGroup}>
-              <label htmlFor="suggestion-email" className={styles.sectionLabel}>
-                Email <span className={styles.optionalTag}>(Optional, if you&apos;d like a reply)</span>
-              </label>
+            {/* Optional Email */}
+            <div className={styles.fieldSection}>
+              <div className={styles.labelRow}>
+                <span className={styles.fieldLabel}>Email Address</span>
+                <span className={styles.optionalTag}>Optional (for follow-up)</span>
+              </div>
               <input
-                id="suggestion-email"
                 type="email"
                 className={styles.emailInput}
                 placeholder="you@example.com"
@@ -166,11 +158,11 @@ export default function SuggestionsPage() {
               />
             </div>
 
-            {error && <div className={styles.error} role="alert">{error}</div>}
+            {error && <div className={styles.error}>{error}</div>}
 
-            <button
-              type="submit"
-              className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
+            <button 
+              type="submit" 
+              className={styles.submitBtn}
               disabled={loading || !content.trim()}
             >
               <Send size={15} />

@@ -5,13 +5,12 @@ import {
   X, 
   ChevronRight, 
   ChevronLeft, 
-  ShieldCheck, 
+  Sparkles, 
   MessagesSquare, 
   ListTree, 
   Mic, 
   Lock,
-  CheckCircle2,
-  Sparkles
+  CheckCircle2
 } from "lucide-react";
 import styles from "./OnboardingModal.module.css";
 
@@ -26,53 +25,59 @@ interface StepContent {
   description: string;
   highlight: string;
   icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  theme: "default" | "lavender" | "sage" | "blush";
 }
 
 const STEPS: StepContent[] = [
   {
-    category: "Welcome",
-    title: "A quiet pause before you react",
+    category: "Welcome to Tempo",
+    title: "A quiet space before you react",
     description:
-      "Tempo is an emotional circuit breaker designed for ADHD, Rejection Sensitive Dysphoria (RSD), and executive freeze. It provides a calm space to regulate your nervous system before responding.",
+      "Tempo is an emotional circuit breaker designed for ADHD, Rejection Sensitive Dysphoria (RSD), and executive freeze. It gives you a low-resistance space to regulate before responding.",
     highlight:
-      "Zero destination: Tempo has no integrations with messaging or email. You can never accidentally dispatch a message.",
-    icon: ShieldCheck,
+      "Zero destination: Tempo has no live connections to email, Slack, or texting. You can never accidentally send a raw message.",
+    icon: Sparkles,
+    theme: "default",
   },
   {
     category: "Communication Buffer",
-    title: "Turn triggers into calm words",
+    title: "Deconstruct perceived rejection",
     description:
-      "Ambiguous emails or blunt texts can trigger an immediate autonomic panic. Paste what was said into the Buffer to find clarity.",
+      "Ambiguous emails or blunt texts can trigger an immediate panic. Paste what was said into the Buffer to find perspective and calm words.",
     highlight:
-      "Tempo validates what you feel, identifies the cognitive distortion, and generates a grounded, de-escalated response.",
+      "Tempo validates what you feel, identifies cognitive distortions (like catastrophizing), and generates grounded, de-escalated options.",
     icon: MessagesSquare,
+    theme: "lavender",
   },
   {
     category: "Task Chunker & Visual Bypass",
-    title: "Defeat physical & mental freeze",
+    title: "Dissolve blank-page paralysis",
     description:
-      "When a project or messy space feels insurmountable, Tempo breaks it down into 3 to 5 atomic, low-friction micro-actions.",
+      "When a project or messy room feels overwhelming, Tempo breaks it down into 3 to 5 atomic, low-energy micro-steps.",
     highlight:
-      "Upload a photo of clutter to spotlight exactly one physical item at a time, eliminating verbal formulation paralysis entirely.",
+      "Visual Spotlight: Snap a photo of clutter to spotlight one single actionable item, eliminating verbal formulation paralysis entirely.",
     icon: ListTree,
+    theme: "sage",
   },
   {
-    category: "Sensory Vent & Audio",
-    title: "Release thoughts & ground your senses",
+    category: "Sensory Vent & Soundscape",
+    title: "Unfiltered release with auditory anchors",
     description:
-      "Speak or write freely in the Sensory Vent space. Activate client-side sound anchors like Brown Noise or a 65 BPM grounding pulse to soothe racing thoughts.",
+      "Speak or write freely in a private, judgment-free space. Activate client-side sound anchors like Brown Noise or a 65 BPM pulse to soothe racing thoughts.",
     highlight:
-      "Non-directive mirroring provides quiet validation without patronizing advice or overwhelming instructions.",
+      "Non-directive mirroring provides quiet perspective without unsolicited advice or overwhelming instructions.",
     icon: Mic,
+    theme: "blush",
   },
   {
     category: "Privacy & Sovereignty",
     title: "Private, ephemeral, and safe",
     description:
-      "Your raw thoughts are never stored by default. Sessions remain local and ephemeral unless you explicitly choose to save them.",
+      "Your raw words are never stored by default. Sessions remain completely local and ephemeral unless you explicitly choose to save them.",
     highlight:
-      "A deterministic safety layer immediately routes crisis language to 988 and 741741 lifelines.",
+      "A deterministic safety layer immediately routes crisis distress to 988 and 741741 lifelines.",
     icon: Lock,
+    theme: "default",
   },
 ];
 
@@ -82,8 +87,6 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
   useEffect(() => {
     if (!isOpen) return;
-
-    // Reset step when opening
     setCurrentStep(0);
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -135,9 +138,9 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Tempo Onboarding Tour"
+      aria-label="Tempo Walkthrough"
     >
-      <div className={styles.modal}>
+      <div className={`${styles.modal} ${styles[step.theme]}`}>
         <button 
           type="button" 
           className={styles.closeButton} 
@@ -148,10 +151,10 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         </button>
 
         <div className={styles.headerRow}>
-          <div className={styles.iconBadge}>
+          <div className={`${styles.iconBadge} ${styles[step.theme]}`}>
             <StepIcon size={22} strokeWidth={2} />
           </div>
-          <div>
+          <div className={styles.titleCol}>
             <span className={styles.stepCategory}>{step.category}</span>
             <h2 className={styles.stepTitle}>{step.title}</h2>
           </div>
@@ -166,7 +169,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         </div>
 
         <div className={styles.footerArea}>
-          {/* Progress Dots */}
+          {/* Progress Indicator */}
           <div className={styles.dotsRow}>
             {STEPS.map((_, index) => (
               <button
@@ -180,21 +183,19 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
           </div>
 
           <div className={styles.buttonsRow}>
-            <div className={styles.leftControls}>
-              <button
-                type="button"
-                className={styles.textBtn}
-                onClick={handleDismiss}
-              >
-                Skip Tour
-              </button>
-            </div>
+            <button
+              type="button"
+              className={styles.textBtn}
+              onClick={handleDismiss}
+            >
+              Skip Tour
+            </button>
 
-            <div className={styles.rightControls}>
+            <div className={styles.navActions}>
               {currentStep > 0 && (
                 <button
                   type="button"
-                  className={styles.navBtn}
+                  className={styles.outlineBtn}
                   onClick={handleBack}
                 >
                   <ChevronLeft size={16} />

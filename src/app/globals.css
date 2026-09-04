@@ -1,26 +1,31 @@
 :root {
-  /* V2 Color System - Light Mode */
-  --bg-base: #FAF6F0; /* Warm Ivory */
-  --bg-surface: #F3EFE6; /* Soft Linen */
-  
-  --primary-sage: #8CAF95; /* Muted Sage Green */
-  --secondary-blue: #7EA3C4; /* Powder Blue */
-  
-  --module-lavender: #B5A8D1; /* Soft Lavender (RSD) */
-  --module-blush: #E8B4A0; /* Warm Blush (Vent) */
-  
-  --accent-celebration: #E3B857; /* Muted Honey Gold */
-  
-  --text-primary: #3A3D3A; /* Soft Charcoal */
-  --text-secondary: #6B6F6B; /* Warm Gray */
-  
-  --border-hairline: #E5E0D5; /* Hairline Sand */
+  /* ==========================================================================
+     Tempo Neurodivergent Sensory Comfort System
+     Warm Ivory, Soft Linen, Muted Sage, Soft Lavender, Warm Blush
+     ========================================================================== */
 
-  /* UI Elements */
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --easing: cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+  /* Light Theme (Warm Ivory & Soft Linen) */
+  --bg-base: #FAF6F0;
+  --bg-surface: #F3EFE6;
+  --bg-elevated: #ECE7DC;
+  
+  --text-primary: #3A3D3A;
+  --text-secondary: #6B6F6B;
+  --text-muted: #8C908C;
+  
+  --border-hairline: #E5E0D5;
+  --border-strong: #D3CDC0;
+  --border-subtle: #EBE6DC;
+
+  /* Signature Functional Color System */
+  --module-lavender: #B5A8D1;  /* RSD Communication Buffer */
+  --primary-sage: #8CAF95;     /* Task Chunker & Grounding */
+  --module-blush: #E8B4A0;     /* Sensory Vent & Vocal Journal */
+  --secondary-blue: #7EA3C4;   /* Auditory Anchors & Focus */
+  --accent-honey: #E3B857;     /* Celebration & Warmth */
+  
+  --shadow-soft: 0 2px 8px rgba(58, 61, 58, 0.06);
+  --shadow-card: 0 4px 16px rgba(58, 61, 58, 0.05);
 
   /* Intent Card Theming Tokens - Light */
   --card-triggered-bg: #FAF7FC;
@@ -52,26 +57,41 @@
   --card-vent-icon-bg: rgba(179, 125, 102, 0.18);
   --badge-blush-bg: rgba(232, 180, 160, 0.35);
   --badge-blush-text: #5E3324;
+
+  /* Gentle, Comforting Corner Scale */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Calming Easing */
+  --easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 180ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    /* V2 Color System - Dark Mode ("Low-Stim Night") */
-    --bg-base: #1C2126; 
+    /* Dark Theme ("Low-Stim Night") */
+    --bg-base: #1C2126;
     --bg-surface: #262B31;
-    
-    --primary-sage: #9DBFA3; 
-    --secondary-blue: #8FB8D6;
-    
-    --module-lavender: #C3B6DE;
-    --module-blush: #EFC3B2;
+    --bg-elevated: #30373E;
     
     --text-primary: #EDEAE2;
     --text-secondary: #A9AFA9;
+    --text-muted: #7A807A;
     
     --border-hairline: #353A40;
-    
-    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --border-strong: #484F57;
+    --border-subtle: #2C3238;
+
+    --module-lavender: #C3B6DE;
+    --primary-sage: #9DBFA3;
+    --module-blush: #EFC3B2;
+    --secondary-blue: #8FB8D6;
+    --accent-honey: #E8C36A;
+
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
 
     /* Intent Card Theming Tokens - Dark */
     --card-triggered-bg: #241F2E;
@@ -107,23 +127,27 @@
 }
 
 [data-theme="dark"] {
-  --bg-base: #1C2126; 
+  --bg-base: #1C2126;
   --bg-surface: #262B31;
-  
-  --primary-sage: #9DBFA3; 
-  --secondary-blue: #8FB8D6;
-  
-  --module-lavender: #C3B6DE;
-  --module-blush: #EFC3B2;
+  --bg-elevated: #30373E;
   
   --text-primary: #EDEAE2;
   --text-secondary: #A9AFA9;
+  --text-muted: #7A807A;
   
   --border-hairline: #353A40;
-  
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --border-strong: #484F57;
+  --border-subtle: #2C3238;
 
-  /* Intent Card Theming Tokens - Dark */
+  --module-lavender: #C3B6DE;
+  --primary-sage: #9DBFA3;
+  --module-blush: #EFC3B2;
+  --secondary-blue: #8FB8D6;
+  --accent-honey: #E8C36A;
+
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+
   --card-triggered-bg: #241F2E;
   --card-triggered-border: rgba(195, 182, 222, 0.35);
   --card-triggered-hover: #2C2638;
@@ -158,21 +182,25 @@
 [data-theme="light"] {
   --bg-base: #FAF6F0;
   --bg-surface: #F3EFE6;
-  
-  --primary-sage: #8CAF95;
-  --secondary-blue: #7EA3C4;
-  
-  --module-lavender: #B5A8D1;
-  --module-blush: #E8B4A0;
+  --bg-elevated: #ECE7DC;
   
   --text-primary: #3A3D3A;
   --text-secondary: #6B6F6B;
+  --text-muted: #8C908C;
   
   --border-hairline: #E5E0D5;
-  
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --border-strong: #D3CDC0;
+  --border-subtle: #EBE6DC;
 
-  /* Intent Card Theming Tokens - Light */
+  --module-lavender: #B5A8D1;
+  --primary-sage: #8CAF95;
+  --module-blush: #E8B4A0;
+  --secondary-blue: #7EA3C4;
+  --accent-honey: #E3B857;
+
+  --shadow-soft: 0 2px 8px rgba(58, 61, 58, 0.06);
+  --shadow-card: 0 4px 16px rgba(58, 61, 58, 0.05);
+
   --card-triggered-bg: #FAF7FC;
   --card-triggered-border: rgba(181, 168, 209, 0.55);
   --card-triggered-hover: #F4EEF8;
@@ -204,30 +232,30 @@
   --badge-blush-text: #5E3324;
 }
 
+/* Base Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
   background-color: var(--bg-base);
   color: var(--text-primary);
-  transition: background-color 0.5s var(--easing), color 0.5s var(--easing);
-  min-height: 100vh;
   margin: 0;
   padding: 0;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 350;
+  font-size: 15.5px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.4s var(--easing), color 0.4s var(--easing);
+  min-height: 100vh;
 }
 
-/* Base resets */
-* {
-  box-sizing: border-box;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* The Living Background Mesh */
+/* The Living Background Mesh (Gentle, low-stim organic calming aura) */
 body::before {
   content: "";
   position: fixed;
@@ -236,17 +264,16 @@ body::before {
   width: 200%;
   height: 200%;
   z-index: -2;
-  /* Soft, oversized blobs in a radial gradient */
   background: 
-    radial-gradient(circle at 50% 50%, rgba(140, 175, 149, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 20% 80%, rgba(126, 163, 196, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(181, 168, 209, 0.08) 0%, transparent 50%);
+    radial-gradient(circle at 45% 45%, rgba(140, 175, 149, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, rgba(126, 163, 196, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(181, 168, 209, 0.07) 0%, transparent 45%);
   background-size: 100% 100%;
-  animation: drift 60s ease-in-out infinite alternate;
+  animation: drift 70s ease-in-out infinite alternate;
   pointer-events: none;
 }
 
-/* 2-3% noise overlay */
+/* Tactile Sensory Grain Texture (Barely visible 2% noise) */
 body::after {
   content: "";
   position: fixed;
@@ -256,16 +283,76 @@ body::after {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.03; /* barely visible grain */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.02;
 }
 
 @keyframes drift {
   0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-2%, 3%) scale(1.02); }
-  100% { transform: translate(3%, -2%) scale(0.98); }
+  50% { transform: translate(-1.5%, 2%) scale(1.01); }
+  100% { transform: translate(2%, -1.5%) scale(0.99); }
 }
 
+/* Typography Hierarchy - Soft, Comforting, Human */
+h1, h2, h3, h4 {
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.font-editorial {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  max-width: 68ch; /* Optimal for ADHD reading comfort */
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Tabular numbers for clean timers and counters */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Architectural Container */
+.page-container {
+  padding: 1.5rem 1.25rem 6.5rem 1.25rem;
+  max-width: 840px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* Hairline Rule Utility */
+.hairline-bottom {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.hairline-top {
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* Friendly Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--primary-sage);
+  outline-offset: 2px;
+}
+
+/* Motion Accessibility */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -275,7 +362,6 @@ body::after {
   }
 }
 
-/* Manual Motion Setting Override */
 [data-motion="reduced"] *, 
 [data-motion="reduced"] ::before, 
 [data-motion="reduced"] ::after {
@@ -285,31 +371,11 @@ body::after {
   scroll-behavior: auto !important;
 }
 
-/* ADHD Typography Scaling & Readability */
+/* ADHD Typography Scaling Options */
 [data-textsize="1"] {
   font-size: 17px;
 }
 
 [data-textsize="2"] {
   font-size: 18.5px;
-}
-
-/* Generic Layout Containers */
-.page-container {
-  padding: 2rem 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding-bottom: 6rem; /* space for bottom nav */
-}
-
-/* Typography styles */
-p {
-  line-height: 1.6;
-  max-width: 65ch; /* max line length for ADHD reading */
-}
-
-/* Base button styles matching V2 */
-button {
-  font-family: inherit;
 }

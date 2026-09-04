@@ -14,37 +14,36 @@
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  background: rgba(250, 246, 240, 0.85);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  padding: 0.4rem 0.6rem;
-  border-radius: 999px;
+  gap: 0.4rem;
+  background: rgba(250, 246, 240, 0.92);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--radius-full);
   border: 1px solid var(--border-hairline);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   max-width: 95vw;
 }
 
 @media (prefers-color-scheme: dark) {
   .navInner {
-    background: rgba(28, 33, 38, 0.88);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    background: rgba(28, 33, 38, 0.92);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 }
 
 :global([data-theme="dark"]) .navInner {
-  background: rgba(28, 33, 38, 0.88);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  background: rgba(28, 33, 38, 0.92);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 :global([data-theme="light"]) .navInner {
-  background: rgba(250, 246, 240, 0.85);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  background: rgba(250, 246, 240, 0.92);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .navItem {
   color: var(--text-secondary);
-  opacity: 0.8;
   transition: all 0.2s var(--easing);
   display: flex;
   flex-direction: column;
@@ -52,8 +51,8 @@
   justify-content: center;
   gap: 0.15rem;
   text-decoration: none;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
   min-width: 52px;
 }
 
@@ -64,61 +63,112 @@
   transition: transform 0.18s ease;
 }
 
+.icon {
+  width: 18px;
+  height: 18px;
+}
+
 .navLabel {
+  font-family: var(--font-sans), sans-serif;
   font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 .navItem:hover {
-  opacity: 1;
   color: var(--text-primary);
   transform: translateY(-1px);
 }
 
+/* Module Thematic Active Highlights */
 .navItem.active {
-  color: #5C4B7E;
-  opacity: 1;
-  background: rgba(181, 168, 209, 0.22);
+  color: var(--text-primary);
 }
 
 .navItem.active .iconContainer {
   transform: scale(1.08);
 }
 
+/* Buffer (Lavender) */
+.navItem.buffer.active {
+  color: #443663;
+  background: rgba(181, 168, 209, 0.25);
+}
+
 @media (prefers-color-scheme: dark) {
-  .navItem.active {
+  .navItem.buffer.active {
     color: #EDE6FA;
-    background: rgba(195, 182, 222, 0.18);
+    background: rgba(195, 182, 222, 0.22);
   }
 }
 
-:global([data-theme="dark"]) .navItem.active {
+:global([data-theme="dark"]) .navItem.buffer.active {
   color: #EDE6FA;
-  background: rgba(195, 182, 222, 0.18);
+  background: rgba(195, 182, 222, 0.22);
 }
 
-:global([data-theme="light"]) .navItem.active {
-  color: #443663;
-  background: rgba(181, 168, 209, 0.22);
+/* Tasks (Sage) */
+.navItem.tasks.active {
+  color: #1B3322;
+  background: rgba(140, 175, 149, 0.25);
 }
 
-.icon {
-  width: 19px;
-  height: 19px;
+@media (prefers-color-scheme: dark) {
+  .navItem.tasks.active {
+    color: #DCF5E3;
+    background: rgba(157, 191, 163, 0.22);
+  }
+}
+
+:global([data-theme="dark"]) .navItem.tasks.active {
+  color: #DCF5E3;
+  background: rgba(157, 191, 163, 0.22);
+}
+
+/* Vent (Blush) */
+.navItem.vent.active {
+  color: #5E3324;
+  background: rgba(232, 180, 160, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  .navItem.vent.active {
+    color: #FFE2D9;
+    background: rgba(239, 195, 178, 0.22);
+  }
+}
+
+:global([data-theme="dark"]) .navItem.vent.active {
+  color: #FFE2D9;
+  background: rgba(239, 195, 178, 0.22);
+}
+
+/* Home & Insights */
+.navItem.home.active,
+.navItem.insights.active {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .navItem.home.active,
+  .navItem.insights.active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+:global([data-theme="dark"]) .navItem.home.active,
+:global([data-theme="dark"]) .navItem.insights.active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 @media (max-width: 480px) {
   .navInner {
-    gap: 0.25rem;
+    gap: 0.2rem;
     padding: 0.35rem 0.4rem;
   }
   .navItem {
-    padding: 0.3rem 0.55rem;
+    padding: 0.3rem 0.5rem;
     min-width: 46px;
   }
-  .navLabel {
-    font-size: 0.64rem;
-  }
 }
-

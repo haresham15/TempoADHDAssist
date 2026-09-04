@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, Check } from "lucide-react";
+import { Check, SkipForward, RefreshCw, Sparkles } from "lucide-react";
 import styles from "./SpatialSpotlight.module.css";
 import { SpatialItem } from "@/app/api/chunk-spatial/route";
 
@@ -15,7 +15,6 @@ interface SpatialSpotlightProps {
 export default function SpatialSpotlight({
   imageUrl,
   items,
-  spaceDescription,
   onReset,
 }: SpatialSpotlightProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -64,17 +63,18 @@ export default function SpatialSpotlight({
   if (isCompleted) {
     return (
       <div className={styles.container}>
-        <div className={styles.completionCard}>
-          <div className={styles.completionIconWrapper}>
-            <CheckCircle2 size={40} className={styles.completionIcon} />
+        <div className={styles.completionPanel}>
+          <div className={styles.completionIcon}>
+            <Sparkles size={28} />
           </div>
-          <h3 className={styles.completionTitle}>Physical Space Cleared</h3>
+          <h3 className={styles.completionTitle}>Physical space cleared!</h3>
           <p className={styles.completionSubtitle}>
-            You completed {items.length} micro-steps without formulating a single sentence of overwhelm. Take a moment to feel the difference.
+            You completed {items.length} spatial micro-steps without formulating a single word of executive overwhelm.
           </p>
           {onReset && (
-            <button type="button" onClick={onReset} className={styles.resetButton}>
-              Clean Another Space
+            <button type="button" onClick={onReset} className={styles.actionBtn}>
+              <RefreshCw size={14} />
+              <span>Spotlight another space</span>
             </button>
           )}
         </div>
@@ -106,7 +106,9 @@ export default function SpatialSpotlight({
             width,
           }}
         >
-          <div className={styles.spotlightBeacon}>{currentIndex + 1}</div>
+          <div className={styles.spotlightBeacon}>
+            {currentIndex + 1}
+          </div>
         </div>
       </div>
 
@@ -114,7 +116,7 @@ export default function SpatialSpotlight({
       <div className={styles.actionCard} role="region" aria-live="polite">
         <div className={styles.metaRow}>
           <span className={styles.stepBadge}>
-            Step {currentIndex + 1} of {items.length} • {currentItem.category}
+            Item {currentIndex + 1} of {items.length} &bull; {currentItem.category}
           </span>
           <span className={styles.timeEstimate}>{currentItem.estTime}</span>
         </div>
@@ -123,11 +125,12 @@ export default function SpatialSpotlight({
 
         <div className={styles.buttonRow}>
           <button type="button" onClick={handleDone} className={styles.doneButton}>
-            <Check size={14} />
-            <span>Done</span>
+            <Check size={16} />
+            <span>Mark Done</span>
           </button>
           <button type="button" onClick={handleSkip} className={styles.skipButton}>
-            Skip this item
+            <SkipForward size={14} />
+            <span>Skip Item</span>
           </button>
         </div>
       </div>

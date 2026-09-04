@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
-  ArrowLeft, 
-  Pause, 
+  ChevronLeft, 
+  Clipboard, 
   Copy, 
   Check, 
+  Sparkles, 
   Bookmark, 
-  HeartHandshake, 
-  Sparkles,
-  Clipboard,
-  Anchor
+  RefreshCw,
+  HeartHandshake,
+  ShieldCheck
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -35,6 +35,10 @@ export default function Triggered() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RsdResult | null>(null);
   const [isCrisis, setIsCrisis] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handlePasteClipboard = async () => {
     try {
@@ -46,10 +50,6 @@ export default function Triggered() {
       console.error("Clipboard read error:", e);
     }
   };
-  const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   const handleProcess = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +91,6 @@ export default function Triggered() {
         relationshipAnchor: data.relationshipAnchor,
         userReframe: tryFirst && userDraft.trim() ? userDraft.trim() : undefined,
       });
-      // Ephemeral by default: no auto-saving to database or localStorage
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
@@ -107,66 +106,86 @@ export default function Triggered() {
     if (result?.translation) {
       navigator.clipboard.writeText(result.translation);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), 1800);
     }
   };
 
   const handleSavePrivately = async () => {
-    if (!result || saved || saving) return;
+    if (!result || saving || saved) return;
 
     setSaving(true);
+    setError("");
+
     try {
-      const response = await fetch("/api/rsd-buffer/save", {
+      const response = await fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: "rsd",
           originalMessage: message,
-          translation: result.translation,
-          pattern: result.pattern,
+          reframedMessage: result.translation,
           emotion: result.emotion,
-          userReframe: result.userReframe,
+          pattern: result.pattern,
           relationshipCategory: relationshipCategory,
         }),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error("Could not save session.");
+        throw new Error(data.error || "Failed to save privately.");
       }
-
       setSaved(true);
     } catch (err: unknown) {
-      console.error("Save error:", err);
-      setError("Unable to save session right now.");
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save session.");
+      }
     } finally {
       setSaving(false);
     }
   };
 
   const handleReset = () => {
-    setResult(null);
-    setIsCrisis(false);
     setMessage("");
     setUserDraft("");
-    setRelationshipCategory("general");
+    setResult(null);
+    setIsCrisis(false);
     setError("");
-    setSaved(false);
     setCopied(false);
+    setSaved(false);
   };
+
+  const relationshipOptions = [
+    { value: "general", label: "General" },
+    { value: "manager", label: "Manager / Boss" },
+    { value: "partner", label: "Partner" },
+    { value: "friend", label: "Friend" },
+    { value: "family", label: "Family" },
+    { value: "colleague", label: "Colleague" },
+  ];
 
   return (
     <main className={`page-container ${styles.container}`}>
-      <button 
-        className={styles.backButton} 
-        onClick={() => router.push("/")}
-        aria-label="Back to home"
-      >
-        <ArrowLeft className={styles.backIcon} strokeWidth={2} />
-      </button>
+      {/* Top Bar Navigation */}
+      <div className={styles.topBar}>
+        <button 
+          type="button" 
+          className={styles.backButton} 
+          onClick={() => router.push("/")}
+          aria-label="Back to home"
+        >
+          <ChevronLeft size={16} />
+          <span>Home</span>
+        </button>
+        <span className={styles.protocolBadge}>
+          <Sparkles size={12} strokeWidth={2.2} /> Communication Buffer
+        </span>
+      </div>
 
       <header className={styles.header}>
-        <div className={styles.pauseIconWrapper}>
-          <Pause strokeWidth={2} className={styles.pauseIcon} />
-        </div>
+        <h1 className={styles.pageTitle}>What message triggered you?</h1>
+        <p className={styles.pageSubtitle}>
+          Pause and find calm words before sending an impulsive, defensive reply.
+        </p>
       </header>
 
       {/* 1. Crisis View (Deterministic Safety Path) */}
@@ -174,17 +193,17 @@ export default function Triggered() {
         <section className={styles.crisisSection} aria-live="assertive">
           <div className={styles.crisisCard}>
             <div className={styles.crisisIconWrapper}>
-              <HeartHandshake className={styles.crisisIcon} strokeWidth={2} />
+              <HeartHandshake size={24} />
             </div>
             <h2 className={styles.crisisTitle}>A pause for something heavier</h2>
             <p className={styles.crisisIntro}>
-              It sounds like you may be carrying something really heavy right now, and this is more than just a communication moment. You don&apos;t have to navigate this alone.
+              It sounds like you may be carrying something really heavy right now. This is more than just a communication moment, and you don&apos;t have to navigate it alone.
             </p>
 
             <div className={styles.resourceList}>
               <div className={styles.resourceItem}>
                 <span className={styles.resourceName}>988 Suicide &amp; Crisis Lifeline</span>
-                <span className={styles.resourceDetail}>Call or text <strong>988</strong> (Free, confidential, 24/7 in the US &amp; Canada)</span>
+                <span className={styles.resourceDetail}>Call or text <strong>988</strong> (Free, confidential, 24/7 in US &amp; Canada)</span>
               </div>
               <div className={styles.resourceItem}>
                 <span className={styles.resourceName}>Crisis Text Line</span>
@@ -193,7 +212,7 @@ export default function Triggered() {
               <div className={styles.resourceItem}>
                 <span className={styles.resourceName}>International Support</span>
                 <span className={styles.resourceDetail}>
-                  Find confidential support services in your country at{" "}
+                  Find confidential support services worldwide at{" "}
                   <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className={styles.resourceLink}>
                     findahelpline.com
                   </a>
@@ -202,8 +221,8 @@ export default function Triggered() {
             </div>
 
             <div className={styles.crisisActions}>
-              <button className={styles.outlineBtn} onClick={handleReset}>
-                Go back
+              <button type="button" className={styles.outlineBtn} onClick={handleReset}>
+                Return to Buffer
               </button>
             </div>
           </div>
@@ -212,9 +231,9 @@ export default function Triggered() {
         /* 2. Input Screen */
         <section className={styles.inputSection}>
           <form onSubmit={handleProcess} className={styles.form}>
-            <div className={styles.textareaWrapper}>
-              <div className={styles.textareaHeaderRow}>
-                <span className={styles.textareaHint}>What happened or what was said?</span>
+            <div className={styles.deskPanel}>
+              <div className={styles.deskHeader}>
+                <span className={styles.deskLabel}>Source Message</span>
                 <button
                   type="button"
                   onClick={handlePasteClipboard}
@@ -222,13 +241,14 @@ export default function Triggered() {
                   title="Paste from clipboard"
                   aria-label="Paste text from clipboard"
                 >
-                  <Clipboard size={13} />
-                  <span>Paste</span>
+                  <Clipboard size={12} />
+                  <span>Paste clipboard</span>
                 </button>
               </div>
+
               <textarea
                 className={styles.textarea}
-                placeholder="Paste what they said, or draft what you want to send..."
+                placeholder="Paste the text message, Slack ping, or email that felt like a blow..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
                 onKeyDown={(e) => {
@@ -244,132 +264,130 @@ export default function Triggered() {
                 maxLength={MAX_CHARS}
                 aria-label="Message to reframe"
               />
-              <div className={styles.textareaFooterRow}>
-                <div className={styles.charCount} aria-live="polite">
-                  {message.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
-                </div>
+
+              <div className={styles.deskFooter}>
+                <span className={styles.charCount}>
+                  {message.length} / {MAX_CHARS} chars
+                </span>
+                <span className={styles.shortcutHint}>Press Ctrl+Enter to reframe</span>
               </div>
             </div>
 
             {/* Context: Relationship Anchor */}
-            <div className={styles.relationshipRow}>
-              <span className={styles.relationshipLabel}>Who sent this? (Optional context)</span>
-              <div className={styles.categoryPills}>
-                {[
-                  { id: "general", label: "General" },
-                  { id: "boss_colleague", label: "Work / Boss" },
-                  { id: "partner", label: "Partner" },
-                  { id: "friend", label: "Friend" },
-                  { id: "family", label: "Family" },
-                ].map((cat) => (
+            <div className={styles.relationshipSection}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.fieldLabel}>Who sent this?</span>
+              </div>
+              <div className={styles.segmentGrid}>
+                {relationshipOptions.map((opt) => (
                   <button
-                    key={cat.id}
+                    key={opt.value}
                     type="button"
-                    className={`${styles.categoryPill} ${relationshipCategory === cat.id ? styles.activeCategoryPill : ""}`}
-                    onClick={() => setRelationshipCategory(cat.id)}
+                    className={`${styles.segmentBtn} ${relationshipCategory === opt.value ? styles.activeSegment : ""}`}
+                    onClick={() => setRelationshipCategory(opt.value)}
                   >
-                    {cat.label}
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Optional Reframe Practice */}
-            <div className={styles.tryToggleRow}>
-              <label className={styles.toggleLabel}>
-                <input 
-                  type="checkbox" 
-                  checked={tryFirst} 
+            {/* Reframe First Option */}
+            <div className={styles.reframeOptionSection}>
+              <label className={styles.toggleRow}>
+                <input
+                  type="checkbox"
+                  checked={tryFirst}
                   onChange={(e) => setTryFirst(e.target.checked)}
                   className={styles.checkbox}
                 />
                 <span className={styles.toggleText}>
-                  Draft my own reframe first
+                  Draft my own calm reframe first before viewing suggestions
                 </span>
               </label>
-            </div>
 
-            {tryFirst && (
-              <div className={styles.userDraftWrapper}>
-                <textarea
-                  className={styles.userDraftTextarea}
-                  placeholder="Type your calm draft here..."
-                  value={userDraft}
-                  onChange={(e) => setUserDraft(e.target.value)}
-                  disabled={loading}
-                  rows={3}
-                />
-              </div>
-            )}
+              {tryFirst && (
+                <div className={styles.userDraftWrapper}>
+                  <textarea
+                    className={styles.userDraftTextarea}
+                    placeholder="Type what you wish you could say calmly..."
+                    value={userDraft}
+                    onChange={(e) => setUserDraft(e.target.value)}
+                    disabled={loading}
+                    rows={3}
+                  />
+                </div>
+              )}
+            </div>
             
             <button 
               type="submit" 
               className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
               disabled={loading || !message.trim()}
             >
-              {loading ? "Reframing..." : "Reframe"}
+              {loading ? "Finding perspective..." : "Reframe Message"}
             </button>
           </form>
+
           {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       ) : (
         /* 3. Results View */
         <section className={styles.resultSection}>
           {result.userReframe && (
-            <div className={styles.celebrationCard}>
-              <div className={styles.celebrationHeader}>
-                <Sparkles size={18} className={styles.celebrationIcon} />
-                <span>Great work taking a pause to reframe it yourself!</span>
-              </div>
-              <p className={styles.userReframeText}>
-                <strong>Your version:</strong> &ldquo;{result.userReframe}&rdquo;
-              </p>
+            <div className={styles.userReframeBlock}>
+              <span className={styles.blockKicker}>Your initial draft</span>
+              <p className={styles.userReframeQuote}>&ldquo;{result.userReframe}&rdquo;</p>
             </div>
           )}
 
           {result.relationshipAnchor && (
-            <div className={styles.anchorCard}>
+            <div className={styles.anchorBlock}>
               <div className={styles.anchorHeader}>
-                <Anchor size={16} className={styles.anchorIcon} />
-                <span>Safe-State Context Anchor</span>
+                <ShieldCheck size={14} className={styles.anchorIcon} />
+                <span className={styles.blockKicker}>Relationship Anchor</span>
               </div>
-              <p className={styles.anchorText}>
-                {result.relationshipAnchor}
-              </p>
+              <p className={styles.anchorBody}>{result.relationshipAnchor}</p>
             </div>
           )}
 
-          <div className={styles.cardsWrapper}>
-            {/* Emotion Reflection Card (Warm Blush) */}
-            <div className={`${styles.resultCard} ${styles.emotionCard}`}>
-              <h3>What you&apos;re feeling</h3>
-              <p className={styles.emotionText}>{result.emotion}</p>
-              
-              {result.pattern && (
-                <div className={styles.patternWrapper}>
-                  <span className={styles.patternLabel}>Thinking pattern</span>
-                  <span className={styles.patternPill}>{result.pattern}</span>
-                </div>
-              )}
+          {/* Core Deconstruction Layout */}
+          <div className={styles.deconstructLayout}>
+            {/* Emotion & Pattern Diagnosis */}
+            <div className={styles.diagnosisBlock}>
+              <div className={styles.diagnosisHeader}>
+                <span className={styles.blockKicker}>Perceived Impact &amp; Emotion</span>
+                {result.pattern && (
+                  <span className={styles.patternBadge}>
+                    {result.pattern}
+                  </span>
+                )}
+              </div>
+              <p className={styles.emotionBody}>{result.emotion}</p>
             </div>
             
-            {/* Calmer Translation Card (Soft Lavender) */}
-            <div className={`${styles.resultCard} ${styles.translationCard}`}>
-              <div className={styles.translationHeader}>
-                <h3>A calmer way to say it</h3>
+            {/* Calmer Translation */}
+            <div className={styles.translationBlock}>
+              <div className={styles.translationHeaderRow}>
+                <span className={styles.blockKicker}>Grounded Response</span>
                 <button 
                   type="button"
                   className={styles.copyBtn} 
                   onClick={handleCopy}
                   title="Copy to clipboard"
-                  aria-label={copied ? "Copied to clipboard" : "Copy to clipboard"}
+                  aria-label={copied ? "Copied" : "Copy to clipboard"}
                 >
                   {copied ? (
-                    <Check strokeWidth={2} className={styles.checkIcon} />
+                    <>
+                      <Check size={14} className={styles.checkIcon} />
+                      <span>Copied</span>
+                    </>
                   ) : (
-                    <Copy strokeWidth={2} className={styles.copyIcon} />
+                    <>
+                      <Copy size={14} />
+                      <span>Copy text</span>
+                    </>
                   )}
-                  <span>{copied ? "Copied" : "Copy"}</span>
                 </button>
               </div>
               <textarea 
@@ -377,26 +395,27 @@ export default function Triggered() {
                 value={result.translation}
                 onChange={(e) => setResult({ ...result, translation: e.target.value })}
                 aria-label="Editable reframed message"
+                rows={4}
               />
             </div>
           </div>
           
-          {/* Actions: Save Privately (Opt-In) & Start Over */}
-          <div className={styles.actions}>
+          {/* Actions: Save Privately & Reset */}
+          <div className={styles.actionRow}>
             <button 
-              type="button"
+              type="button" 
               className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
               onClick={handleSavePrivately}
               disabled={saving || saved}
             >
               {saved ? (
                 <>
-                  <Check strokeWidth={2} className={styles.btnIcon} />
-                  <span>Saved privately</span>
+                  <Check size={15} />
+                  <span>Saved to history</span>
                 </>
               ) : (
                 <>
-                  <Bookmark strokeWidth={2} className={styles.btnIcon} />
+                  <Bookmark size={15} />
                   <span>{saving ? "Saving..." : "Save privately"}</span>
                 </>
               )}
@@ -407,7 +426,8 @@ export default function Triggered() {
               className={styles.outlineBtn} 
               onClick={handleReset}
             >
-              Start over
+              <RefreshCw size={14} />
+              <span>Start new buffer</span>
             </button>
           </div>
 

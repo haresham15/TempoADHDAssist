@@ -3,16 +3,28 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { ArrowLeft, Check, HeartHandshake, Zap, Bookmark, Camera, Type, RefreshCw } from "lucide-react";
 import SpatialSpotlight from "@/components/SpatialSpotlight";
 import { SpatialItem } from "@/app/api/chunk-spatial/route";
 import AudioAnchorControl from "@/components/AudioAnchorControl";
 import BodyDoublingSyndicate from "@/components/BodyDoublingSyndicate";
+import { 
+  ChevronLeft, 
+  Zap, 
+  Camera, 
+  PenTool, 
+  CheckCircle2, 
+  Circle, 
+  Sparkles, 
+  Bookmark, 
+  RefreshCw,
+  Eye,
+  List
+} from "lucide-react";
 import styles from "./page.module.css";
 
 export default function Overwhelmed() {
   const router = useRouter();
-  const { ventContext, sound } = useTempo();
+  const { ventContext } = useTempo();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // V4 Mode Switch & Spatial State
@@ -24,7 +36,7 @@ export default function Overwhelmed() {
 
   const [task, setTask] = useState(ventContext || "");
   const [steps, setSteps] = useState<string[]>([]);
-  const [energyLevel, setEnergyLevel] = useState("Low");
+  const [, setEnergyLevel] = useState("Low");
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [focusMode, setFocusMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,7 +74,11 @@ export default function Overwhelmed() {
 
         setSpatialItems(data.items || []);
       } catch (err: unknown) {
-        setSpatialError(err instanceof Error ? err.message : "Could not analyze image.");
+        if (err instanceof Error) {
+          setSpatialError(err.message || "Failed to analyze spatial clutter.");
+        } else {
+          setSpatialError("Failed to analyze spatial clutter.");
+        }
       } finally {
         setSpatialLoading(false);
       }
@@ -74,31 +90,28 @@ export default function Overwhelmed() {
     setSpatialImage(null);
     setSpatialItems([]);
     setSpatialError("");
-    setSpatialLoading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const playCalmTone = () => {
-    if (!sound) return;
     try {
       const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
+
       osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.frequency.setValueAtTime(528, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
       osc.connect(gain);
       gain.connect(ctx.destination);
+
       osc.start();
-      osc.stop(ctx.currentTime + 0.25);
+      osc.stop(ctx.currentTime + 0.35);
     } catch {
-      // Audio context disabled or blocked
+      // Audio autoplay restrictions ignored safely
     }
   };
 
@@ -132,7 +145,9 @@ export default function Overwhelmed() {
       }
 
       setSteps(data.steps || []);
-      if (data.energyLevel) setEnergyLevel(data.energyLevel);
+      if (data.energyLevel) {
+        setEnergyLevel(data.energyLevel);
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
@@ -193,26 +208,29 @@ export default function Overwhelmed() {
   const allCompleted = steps.length > 0 && completedSteps.size === steps.length;
   const progressPercent = steps.length > 0 ? Math.round((completedSteps.size / steps.length) * 100) : 0;
   
-  // Find first uncompleted step index for focus mode
   const currentStepIndex = steps.findIndex((_, i) => !completedSteps.has(i));
 
   return (
     <main className={`page-container ${styles.container}`}>
-      <button 
-        className={styles.backButton} 
-        onClick={() => router.push("/")}
-        aria-label="Back to home"
-      >
-        <ArrowLeft className={styles.backIcon} strokeWidth={2} /> 
-      </button>
+      <div className={styles.topBar}>
+        <button 
+          type="button"
+          className={styles.backButton} 
+          onClick={() => router.push("/")}
+          aria-label="Back to home"
+        >
+          <ChevronLeft size={16} />
+          <span>Home</span>
+        </button>
+        <span className={styles.protocolBadge}>
+          <Zap size={12} strokeWidth={2.2} /> Task Chunker
+        </span>
+      </div>
 
       {/* 1. Crisis View */}
       {isCrisis ? (
         <section className={styles.crisisSection} aria-live="assertive">
           <div className={styles.crisisCard}>
-            <div className={styles.crisisIconWrapper}>
-              <HeartHandshake className={styles.crisisIcon} strokeWidth={2} />
-            </div>
             <h2 className={styles.crisisTitle}>A pause for something heavier</h2>
             <p className={styles.crisisIntro}>
               It sounds like you may be going through something really heavy right now, and this is more than an executive function task.
@@ -230,8 +248,8 @@ export default function Overwhelmed() {
             </div>
 
             <div className={styles.crisisActions}>
-              <button className={styles.outlineBtn} onClick={handleReset}>
-                Go back
+              <button type="button" className={styles.outlineBtn} onClick={handleReset}>
+                Return to Tasks
               </button>
             </div>
           </div>
@@ -252,10 +270,12 @@ export default function Overwhelmed() {
       ) : steps.length === 0 ? (
         /* 2. Task Input / Spatial Upload View */
         <section className={styles.inputSection}>
-          <div className={styles.introHeading}>
-            <h1>Task Chunker</h1>
-            <p>Break any daunting task into small, manageable micro-steps.</p>
-          </div>
+          <header className={styles.header}>
+            <h1 className={styles.pageTitle}>Decompose your task</h1>
+            <p className={styles.pageSubtitle}>
+              Break daunting tasks into small micro-steps to dissolve initiation paralysis.
+            </p>
+          </header>
 
           <div className={styles.modeSwitch} role="tablist">
             <button
@@ -265,7 +285,8 @@ export default function Overwhelmed() {
               role="tab"
               aria-selected={inputMode === "text"}
             >
-              Type Task
+              <PenTool size={14} />
+              <span>Type Task</span>
             </button>
             <button
               type="button"
@@ -274,32 +295,38 @@ export default function Overwhelmed() {
               role="tab"
               aria-selected={inputMode === "spatial"}
             >
-              Photo Cleanup
+              <Camera size={14} />
+              <span>Visual Bypass (Photo Clutter)</span>
             </button>
           </div>
 
           {inputMode === "text" ? (
-            <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder="What task is overwhelming you right now?"
-                value={task}
-                onChange={(e) => setTask(e.target.value)}
-                disabled={loading}
-                autoFocus
-                aria-label="Task to break down"
-              />
+            <form onSubmit={handleChunkTask} className={styles.inputForm}>
+              <div className={styles.deskInputPanel}>
+                <div className={styles.deskHeader}>
+                  <span className={styles.deskLabel}>What feels overwhelming right now?</span>
+                </div>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g., Clean off the chaotic desk, start essay, organize taxes..."
+                  value={task}
+                  onChange={(e) => setTask(e.target.value)}
+                  disabled={loading}
+                  autoFocus
+                  aria-label="Task to break down"
+                />
+              </div>
               <button 
                 type="submit" 
                 className={styles.submitBtn}
                 disabled={loading || !task.trim()}
               >
-                {loading ? <span className={styles.pulseText}>Breaking it down...</span> : "Break it down"}
+                {loading ? "Breaking into micro-steps..." : "Break Down into Micro-Steps"}
               </button>
             </form>
           ) : (
-            <div className={styles.inputWrapper}>
+            <div className={styles.photoZoneWrapper}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -311,12 +338,12 @@ export default function Overwhelmed() {
                 disabled={spatialLoading}
               />
               <label htmlFor="spatial-photo-input" className={styles.photoUploadZone}>
-                <Camera size={32} className={styles.photoIconSvg} />
-                <p className={styles.photoUploadPrompt}>
-                  {spatialLoading ? "Analyzing space..." : "Take or upload a photo of the mess"}
+                <Camera size={28} className={styles.photoIcon} />
+                <p className={styles.photoPrompt}>
+                  {spatialLoading ? "Analyzing physical clutter in space..." : "Take or upload a photo of the messy room or desk"}
                 </p>
-                <p className={styles.photoUploadSub}>
-                  No typing required. Tempo will visually spotlight one item at a time.
+                <p className={styles.photoSub}>
+                  No typing needed. Tempo visually spotlights one actionable physical object at a time.
                 </p>
               </label>
             </div>
@@ -332,15 +359,26 @@ export default function Overwhelmed() {
             <AudioAnchorControl />
             <BodyDoublingSyndicate />
           </div>
+
           <div className={styles.stepsHeader}>
             <div className={styles.stepsHeaderLeft}>
               <button
                 type="button"
                 className={`${styles.modeToggleBtn} ${focusMode ? styles.modeActive : ""}`}
                 onClick={() => setFocusMode(!focusMode)}
-                aria-label={focusMode ? "Switch to all steps list" : "Switch to single step focus mode"}
+                aria-label={focusMode ? "Show all steps" : "Focus on single step"}
               >
-                {focusMode ? "Show All Steps" : "Focus Mode"}
+                {focusMode ? (
+                  <>
+                    <List size={14} />
+                    <span>Show all steps</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye size={14} />
+                    <span>Focus mode (one at a time)</span>
+                  </>
+                )}
               </button>
             </div>
             <span className={styles.stepProgress}>
@@ -356,89 +394,91 @@ export default function Overwhelmed() {
           {focusMode && currentStepIndex !== -1 ? (
             /* Single-Step Focus Mode Spotlight */
             <div className={styles.focusSpotlightCard}>
-              <div className={styles.focusStepBadge}>
-                <span>Step {currentStepIndex + 1} of {steps.length}</span>
-                {currentStepIndex === 0 && <span className={styles.gatewayPill}>Gateway Step</span>}
-              </div>
-              <h3 className={styles.focusStepTitle}>{steps[currentStepIndex]}</h3>
-              <p className={styles.focusStepHint}>Don&apos;t think about the rest. Just take this single micro-action.</p>
+              <span className={styles.focusStepBadge}>
+                Step {currentStepIndex + 1} of {steps.length}
+              </span>
+              <p className={styles.focusStepText}>{steps[currentStepIndex]}</p>
+              
               <button
                 type="button"
-                className={styles.focusCompleteBtn}
+                className={styles.focusDoneBtn}
                 onClick={() => toggleStep(currentStepIndex)}
               >
-                <Check size={18} strokeWidth={2.5} />
-                <span>Done! Next micro-step</span>
+                <CheckCircle2 size={16} />
+                <span>Mark Step Complete</span>
               </button>
             </div>
           ) : (
-            /* All Steps List */
-            steps.map((step: string, index: number) => {
-              const isCompleted = completedSteps.has(index);
-              return (
-                <div 
-                  key={index} 
-                  className={`${styles.stepCard} ${isCompleted ? styles.completedCard : ""}`}
-                  style={{ animationDelay: `${index * 0.08}s` }}
-                >
-                  <button 
+            /* All Steps Checklist */
+            <div className={styles.stepsList}>
+              {steps.map((step, index) => {
+                const isDone = completedSteps.has(index);
+                return (
+                  <button
+                    key={index}
                     type="button"
-                    className={`${styles.checkbox} ${isCompleted ? styles.checked : ""}`}
+                    className={`${styles.stepRow} ${isDone ? styles.stepDone : ""}`}
                     onClick={() => toggleStep(index)}
-                    aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
+                    aria-pressed={isDone}
                   >
-                    {isCompleted && <Check strokeWidth={3} className={styles.checkIcon} />}
+                    <div className={styles.stepCheckIcon}>
+                      {isDone ? (
+                        <CheckCircle2 size={20} className={styles.checkDoneIcon} />
+                      ) : (
+                        <Circle size={20} className={styles.circlePendingIcon} />
+                      )}
+                    </div>
+                    <span className={styles.stepText}>{step}</span>
                   </button>
-                  <div className={styles.stepText}>
-                    {index === 0 && <span className={styles.gatewayLabel}>Gateway Step: </span>}
-                    {step}
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
 
-          <div className={styles.taskActions}>
-            <button 
-              type="button"
-              className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
-              onClick={handleSaveTask}
-              disabled={saving || saved}
-            >
-              {saved ? (
-                <>
-                  <Check size={16} />
-                  <span>Saved to History</span>
-                </>
-              ) : (
-                <>
-                  <Bookmark size={16} />
-                  <span>{saving ? "Saving..." : "Save privately"}</span>
-                </>
-              )}
-            </button>
-
+          <div className={styles.actionRow}>
             <button 
               type="button" 
-              className={styles.outlineBtn} 
+              className={styles.outlineBtn}
               onClick={handleReset}
             >
-              Start over
+              <RefreshCw size={14} />
+              <span>Start new task</span>
             </button>
           </div>
         </section>
       ) : (
-        /* 4. Completion View */
-        <section className={styles.successContainer}>
-          <h2>That&apos;s the whole thing, done.</h2>
-          <p className={styles.successSub}>You cut through the paralysis and finished every single micro-action.</p>
-          <button 
-            type="button"
-            className={styles.outlineBtn} 
-            onClick={handleReset}
-          >
-            Break down something else
-          </button>
+        /* 4. Completion State */
+        <section className={styles.completionSection}>
+          <div className={styles.celebrationCard}>
+            <div className={styles.celebrationIcon}>
+              <Sparkles size={28} />
+            </div>
+            <h2 className={styles.celebrationTitle}>All micro-steps completed!</h2>
+            <p className={styles.celebrationDesc}>
+              You broke through executive freeze and made real momentum.
+            </p>
+
+            <div className={styles.celebrationActions}>
+              <button 
+                type="button" 
+                className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
+                onClick={handleSaveTask}
+                disabled={saving || saved}
+              >
+                <Bookmark size={15} />
+                <span>{saved ? "Saved to history" : saving ? "Saving..." : "Save privately"}</span>
+              </button>
+              
+              <button 
+                type="button" 
+                className={styles.outlineBtn}
+                onClick={handleReset}
+              >
+                <RefreshCw size={14} />
+                <span>Start another task</span>
+              </button>
+            </div>
+          </div>
         </section>
       )}
     </main>

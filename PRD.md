@@ -14,6 +14,7 @@ Tempo is an AI-assisted emotional buffer, communication coach, and executive reg
 Rather than positioning itself as a clinical therapy app or a complex productivity system, Tempo operates as a **tactical, state-dependent circuit breaker**. When an emotional trigger or task paralysis occurs, Tempo provides a safe, zero-destination space to pause, decompress, identify distorted cognitive patterns, and find low-resistance steps forward before an impulsive action or shame spiral takes place.
 
 In **V4 (The Neurodivergent Leap)**, Tempo expands from purely verbal interactions into radical neurodivergent accommodations:
+
 1. **Spatial Task Chunker (The Visual Bypass):** Eliminating text input entirely for messy rooms or cluttered desks by using computer vision to spotlight one single physical object at a time.
 2. **Dynamic Auditory Anchoring:** Client-side generative Web Audio engine providing adaptive 60–75 BPM grounding rhythms and brown-noise soundscapes during Focus Mode and Venting.
 3. **Safe-State RAG Memory Fabric:** An opt-in contextual memory layer linking past reframed interactions by relationship category to objectively dismantle recurrent RSD cognitive distortions.

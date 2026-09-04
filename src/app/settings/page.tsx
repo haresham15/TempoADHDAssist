@@ -3,22 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
+import BrandHeader from "@/components/BrandHeader";
+import OnboardingModal from "@/components/OnboardingModal";
 import { 
-  ArrowLeft, 
+  ChevronLeft, 
+  Sliders, 
   Sun, 
   Moon, 
   Monitor, 
-  Sparkles, 
+  Type, 
+  Activity, 
   Volume2, 
-  VolumeX, 
-  Eye, 
-  Check,
-  User,
-  HelpCircle,
-  Lock
+  User, 
+  Compass 
 } from "lucide-react";
-import BrandHeader from "@/components/BrandHeader";
-import OnboardingModal from "@/components/OnboardingModal";
 import styles from "./page.module.css";
 
 export default function Settings() {
@@ -41,33 +39,34 @@ export default function Settings() {
     <main className={`page-container ${styles.container}`}>
       <BrandHeader />
       
-      <div className={styles.backWrapper}>
+      <div className={styles.topBar}>
         <button 
+          type="button"
           className={styles.backButton} 
           onClick={() => router.push("/")}
           aria-label="Back to home"
         >
-          <ArrowLeft size={18} />
-          <span>Back to Home</span>
+          <ChevronLeft size={16} />
+          <span>Home</span>
         </button>
+        <span className={styles.protocolBadge}>
+          <Sliders size={12} strokeWidth={2.2} /> Preferences
+        </span>
       </div>
 
-      <section className={styles.settingsCard}>
-        <div className={styles.headerArea}>
-          <div className={styles.iconCircle}>
-            <Sparkles size={24} strokeWidth={2} />
-          </div>
-          <div>
-            <h1 className={styles.settingsTitle}>Sensory &amp; Focus Settings</h1>
-            <p className={styles.settingsSubtitle}>Tailor Tempo to your nervous system and executive preferences.</p>
-          </div>
-        </div>
+      <header className={styles.header}>
+        <h1 className={styles.pageTitle}>Sensory &amp; Focus Preferences</h1>
+        <p className={styles.pageSubtitle}>
+          Tailor Tempo to your nervous system, visual comfort, and sensory needs.
+        </p>
+      </header>
 
-        {/* 1. Visual Theme (Glare & Light Control) */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Visual Atmosphere</span>
-            <span className={styles.settingHint}>Adjust contrast and glare</span>
+      <section className={styles.settingsForm}>
+        {/* 1. Visual Theme */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Contrast &amp; Palette</span>
+            <span className={styles.settingDesc}>Select warm paper ivory or low-stim dark theme</span>
           </div>
           <div className={styles.segmentedControl}>
             <button
@@ -75,36 +74,33 @@ export default function Settings() {
               className={`${styles.segmentBtn} ${theme === "system" ? styles.segmentActive : ""}`}
               onClick={() => setTheme("system")}
             >
-              <Monitor size={15} />
+              <Monitor size={13} />
               <span>System</span>
-              {theme === "system" && <Check size={13} className={styles.checkMarker} />}
-            </button>
-            <button
-              type="button"
-              className={`${styles.segmentBtn} ${theme === "dark" ? styles.segmentActive : ""}`}
-              onClick={() => setTheme("dark")}
-            >
-              <Moon size={15} />
-              <span>Low-Stim Night</span>
-              {theme === "dark" && <Check size={13} className={styles.checkMarker} />}
             </button>
             <button
               type="button"
               className={`${styles.segmentBtn} ${theme === "light" ? styles.segmentActive : ""}`}
               onClick={() => setTheme("light")}
             >
-              <Sun size={15} />
-              <span>Warm Linen</span>
-              {theme === "light" && <Check size={13} className={styles.checkMarker} />}
+              <Sun size={13} />
+              <span>Warm Light</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.segmentBtn} ${theme === "dark" ? styles.segmentActive : ""}`}
+              onClick={() => setTheme("dark")}
+            >
+              <Moon size={13} />
+              <span>Dark Theme</span>
             </button>
           </div>
         </div>
 
-        {/* 2. Text Scaling & Readability */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Typography Scale</span>
-            <span className={styles.settingHint}>Enhance scanning &amp; legibility</span>
+        {/* 2. Text Scaling */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Typography Sizing</span>
+            <span className={styles.settingDesc}>Enlarge font scale for effortless scanning</span>
           </div>
           <div className={styles.segmentedControl}>
             <button
@@ -112,33 +108,31 @@ export default function Settings() {
               className={`${styles.segmentBtn} ${textSize === 0 ? styles.segmentActive : ""}`}
               onClick={() => setTextSize(0)}
             >
-              <span>Default (100%)</span>
-              {textSize === 0 && <Check size={13} className={styles.checkMarker} />}
+              <Type size={13} />
+              <span>Default</span>
             </button>
             <button
               type="button"
               className={`${styles.segmentBtn} ${textSize === 1 ? styles.segmentActive : ""}`}
               onClick={() => setTextSize(1)}
             >
-              <span>Comfortable (+15%)</span>
-              {textSize === 1 && <Check size={13} className={styles.checkMarker} />}
+              <span>Comfort (110%)</span>
             </button>
             <button
               type="button"
               className={`${styles.segmentBtn} ${textSize === 2 ? styles.segmentActive : ""}`}
               onClick={() => setTextSize(2)}
             >
-              <span>Spacious (+30%)</span>
-              {textSize === 2 && <Check size={13} className={styles.checkMarker} />}
+              <span>Large (120%)</span>
             </button>
           </div>
         </div>
 
-        {/* 3. Motion Sensitivity */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Motion &amp; Transitions</span>
-            <span className={styles.settingHint}>Reduce background stimulation</span>
+        {/* 3. Motion Settings */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Motion &amp; Animations</span>
+            <span className={styles.settingDesc}>Disable animations if you experience vestibular sensitivity</span>
           </div>
           <div className={styles.segmentedControl}>
             <button
@@ -146,26 +140,24 @@ export default function Settings() {
               className={`${styles.segmentBtn} ${motion === "full" ? styles.segmentActive : ""}`}
               onClick={() => setMotion("full")}
             >
-              <Eye size={15} />
-              <span>Fluid Motion</span>
-              {motion === "full" && <Check size={13} className={styles.checkMarker} />}
+              <Activity size={13} />
+              <span>Full Motion</span>
             </button>
             <button
               type="button"
               className={`${styles.segmentBtn} ${motion === "reduced" ? styles.segmentActive : ""}`}
               onClick={() => setMotion("reduced")}
             >
-              <span>Still &amp; Calm</span>
-              {motion === "reduced" && <Check size={13} className={styles.checkMarker} />}
+              <span>Reduced Motion</span>
             </button>
           </div>
         </div>
 
         {/* 4. Auditory Feedback */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Micro-Action Audio</span>
-            <span className={styles.settingHint}>Soft chime on step completion</span>
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Auditory Chimes</span>
+            <span className={styles.settingDesc}>Play gentle harmonic tones on step completion</span>
           </div>
           <div className={styles.segmentedControl}>
             <button
@@ -173,61 +165,52 @@ export default function Settings() {
               className={`${styles.segmentBtn} ${sound ? styles.segmentActive : ""}`}
               onClick={() => setSound(true)}
             >
-              <Volume2 size={15} />
-              <span>Chimes On</span>
-              {sound && <Check size={13} className={styles.checkMarker} />}
+              <Volume2 size={13} />
+              <span>Enabled</span>
             </button>
             <button
               type="button"
-              className={`${styles.segmentBtn} {!sound ? styles.segmentActive : ""}`}
+              className={`${styles.segmentBtn} ${!sound ? styles.segmentActive : ""}`}
               onClick={() => setSound(false)}
             >
-              <VolumeX size={15} />
-              <span>Silent Mode</span>
-              {!sound && <Check size={13} className={styles.checkMarker} />}
+              <span>Muted</span>
             </button>
           </div>
         </div>
 
-        {/* 5. Personal Greeting */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Preferred Name</span>
-            <span className={styles.settingHint}>What should Tempo call you?</span>
+        {/* 5. User Name */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Preferred Name</span>
+            <span className={styles.settingDesc}>Display name on the welcoming screen</span>
           </div>
           <div className={styles.nameInputWrapper}>
-            <User size={16} className={styles.nameIcon} />
+            <User size={14} className={styles.inputIcon} />
             <input
               type="text"
-              className={styles.nameInput}
-              placeholder="Your name or nickname..."
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              maxLength={30}
-              aria-label="Your preferred name"
+              placeholder="e.g. Alex"
+              className={styles.nameInput}
+              maxLength={24}
             />
           </div>
         </div>
 
-        {/* 6. Website Walkthrough & Tutorial */}
-        <div className={styles.settingGroup}>
-          <div className={styles.settingHeader}>
-            <span className={styles.settingLabel}>Website Walkthrough</span>
-            <span className={styles.settingHint}>Review how Tempo works, features, and core safety</span>
+        {/* 6. Onboarding Tour */}
+        <div className={styles.settingRow}>
+          <div className={styles.settingInfo}>
+            <span className={styles.settingTitle}>Product Walkthrough</span>
+            <span className={styles.settingDesc}>Review the step-by-step walkthrough of Tempo&apos;s tools</span>
           </div>
           <button
             type="button"
             className={styles.tourBtn}
             onClick={() => setShowTour(true)}
           >
-            <HelpCircle size={15} />
-            <span>Open Website Tour</span>
+            <Compass size={14} />
+            <span>Replay Walkthrough</span>
           </button>
-        </div>
-
-        <div className={styles.privacyNote}>
-          <Lock size={13} className={styles.privacyLockIcon} />
-          <span>Your preferences are preserved locally and synced to your encrypted private profile.</span>
         </div>
       </section>
 
@@ -238,4 +221,3 @@ export default function Settings() {
     </main>
   );
 }
-

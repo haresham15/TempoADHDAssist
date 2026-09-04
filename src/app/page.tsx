@@ -42,7 +42,6 @@ export default function Home() {
       setSeconds((prev) => {
         if (prev > 1) return prev - 1;
 
-        // Advance phase
         setBreathPhase((currentPhase) => {
           if (currentPhase === "Inhale") return "Hold";
           if (currentPhase === "Hold") return "Exhale";
@@ -79,7 +78,7 @@ export default function Home() {
               }}
               aria-label="Start 4-second calming box breathing"
             >
-              <Wind size={14} className={styles.windIcon} />
+              <Wind size={15} className={styles.windIcon} />
               <span>Feeling reactive? Take a 4-second breath</span>
             </button>
           ) : (
@@ -108,11 +107,11 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardTriggered} ${styles.cardPrimary}`}
           onClick={() => router.push('/triggered')}
-          aria-label="I'm triggered - Pause and find calm words. Takes about 30 seconds."
+          aria-label="I'm triggered - Pause, deconstruct reactive impulses & find calm words. Takes about 30 seconds."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.flagshipBadge}>
-              <Sparkles size={12} strokeWidth={2.5} /> Communication Buffer
+              <Sparkles size={12} strokeWidth={2.2} /> Communication Buffer
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~30 sec
@@ -124,22 +123,22 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I&apos;m triggered</h2>
-              <p>Pause, reframe reactive messages &amp; find calm words</p>
+              <p>Pause, name the thinking pattern &amp; find calm words</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>
         </button>
 
-        {/* Task Chunker */}
+        {/* Task Chunker & Visual Bypass */}
         <button 
           type="button"
           className={`${styles.intentCard} ${styles.cardOverwhelm}`}
           onClick={() => router.push('/overwhelmed')}
-          aria-label="Task Chunker - Break down tasks into small micro-steps. Takes about 2 minutes."
+          aria-label="Task Chunker - Break down tasks into zero-friction micro-actions or photograph clutter. Takes about 2 minutes."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeSage}>
-              <Zap size={11} strokeWidth={2.5} /> Task Chunker
+              <Zap size={11} strokeWidth={2.2} /> Task Chunker
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~2 min
@@ -151,22 +150,22 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I&apos;m overwhelmed</h2>
-              <p>Break daunting tasks into small, manageable micro-steps</p>
+              <p>Zero-friction micro-actions tailored for executive function</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>
         </button>
 
-        {/* Voice Journal */}
+        {/* Sensory Vent & Vocal Journal */}
         <button 
           type="button"
           className={`${styles.intentCard} ${styles.cardVent}`}
           onClick={() => router.push('/vent')}
-          aria-label="Sensory Vent - Speak or write freely in a private space. Takes about 60 seconds."
+          aria-label="Sensory Vent - Speak freely into a judgment-free reflective audio space. Takes about 60 seconds."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeBlush}>
-              <Mic size={11} strokeWidth={2.5} /> Sensory Vent
+              <Mic size={11} strokeWidth={2.2} /> Sensory Vent
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~60 sec
@@ -178,7 +177,7 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I need to vent</h2>
-              <p>Speak or write freely in a quiet, private space</p>
+              <p>Speak freely into a judgment-free reflective audio space</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>
@@ -192,4 +191,3 @@ export default function Home() {
     </main>
   );
 }
-

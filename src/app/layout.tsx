@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit, Lora } from "next/font/google";
 import { TempoProvider } from "@/lib/TempoContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  weight: ["300", "400", "500", "600"],
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-editorial",
+  display: "swap",
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+});
 
 export const metadata: Metadata = {
   title: "Tempo | RSD Communication Buffer & Pattern Insights",
@@ -27,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={`${outfit.variable} ${lora.variable}`}>
       <body>
         <TempoProvider>
           {children}

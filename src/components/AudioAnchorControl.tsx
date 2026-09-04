@@ -14,14 +14,8 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
   const [currentMode, setCurrentMode] = useState<AnchorMode>(defaultMode);
 
   useEffect(() => {
-    // Keep internal state aligned with engine
     const engine = getAuditoryAnchor();
     setCurrentMode(engine.getMode());
-
-    return () => {
-      // Ensure audio stops if user navigates away completely
-      // Only stop if this is the only active controller
-    };
   }, []);
 
   const handleSelectMode = (mode: AnchorMode) => {
@@ -39,7 +33,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
     <div className={`${styles.anchorContainer} ${className}`} style={style} role="region" aria-label="Auditory Anchor Soundscape">
       <div className={styles.label}>
         <span className={`${styles.activeIndicator} ${currentMode !== "off" ? styles.on : ""}`} aria-hidden="true" />
-        <span>Sound Anchor</span>
+        <span className={styles.labelText}>[ AUDIO ANCHOR ]</span>
       </div>
       <div className={styles.modeButtons}>
         <button
@@ -49,7 +43,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="Gentle low-frequency brown noise to block auditory overstimulation"
           aria-pressed={currentMode === "brown"}
         >
-          Brown Noise
+          [ BROWN NOISE ]
         </button>
         <button
           type="button"
@@ -58,7 +52,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="Subtle 65 BPM pulse to ground heart rate and stabilize pacing"
           aria-pressed={currentMode === "pulse"}
         >
-          65 BPM Pulse
+          [ 65 BPM PULSE ]
         </button>
         <button
           type="button"
@@ -67,7 +61,7 @@ export default function AudioAnchorControl({ className = "", style, defaultMode 
           title="432Hz harmonic warm drone for sensory grounding"
           aria-pressed={currentMode === "drone"}
         >
-          432Hz Drone
+          [ 432HZ DRONE ]
         </button>
       </div>
     </div>

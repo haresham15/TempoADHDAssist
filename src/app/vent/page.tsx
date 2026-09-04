@@ -3,8 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { ArrowLeft, Mic, HeartHandshake, Check, Bookmark } from "lucide-react";
 import AudioAnchorControl from "@/components/AudioAnchorControl";
+import { 
+  ChevronLeft, 
+  Mic, 
+  Square, 
+  Edit3, 
+  Bookmark, 
+  RefreshCw, 
+  Check,
+  HeartHandshake
+} from "lucide-react";
 import styles from "./page.module.css";
 
 export default function Vent() {
@@ -19,7 +28,7 @@ export default function Vent() {
   const [isCrisis, setIsCrisis] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [volumes, setVolumes] = useState<number[]>([0, 0, 0, 0, 0]); // 5 bars
+  const [volumes, setVolumes] = useState<number[]>([0.1, 0.1, 0.1, 0.1, 0.1]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -45,7 +54,6 @@ export default function Vent() {
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
     
-    // Sample 5 distinct frequency bands
     const step = Math.floor(dataArray.length / 5);
     const newVolumes = [
       dataArray[0] / 255,
@@ -61,26 +69,27 @@ export default function Vent() {
 
   const startRecording = async () => {
     setError("");
-    chunksRef.current = [];
     setRecordSeconds(0);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Setup AudioContext for live frequency visualizer
-      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      const source = audioCtx.createMediaStreamSource(stream);
-      source.connect(analyser);
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextClass) {
+        const audioCtx = new AudioContextClass();
+        audioContextRef.current = audioCtx;
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        analyserRef.current = analyser;
 
-      audioContextRef.current = audioCtx;
-      analyserRef.current = analyser;
-
-      updateWaveform();
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+        updateWaveform();
+      }
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -88,89 +97,108 @@ export default function Vent() {
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        processAudio(audioBlob);
-        
-        // Stop audio tracks
         stream.getTracks().forEach((track) => track.stop());
-        if (animationRef.current) cancelAnimationFrame(animationRef.current);
-        if (audioContextRef.current) audioContextRef.current.close();
-        if (timerRef.current) clearInterval(timerRef.current);
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+        await processAudio(audioBlob);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
 
-      // Start duration timer
       timerRef.current = setInterval(() => {
-        setRecordSeconds((prev) => prev + 1);
+        setRecordSeconds((prev) => {
+          if (prev >= 60) {
+            stopRecording();
+            return 60;
+          }
+          return prev + 1;
+        });
       }, 1000);
     } catch (err: unknown) {
-      setError("Microphone access is required to use the Voice Journal.");
-      console.error(err);
+      if (err instanceof Error) {
+        setError(err.message || "Microphone access denied or not supported.");
+      } else {
+        setError("Microphone access denied or not supported.");
+      }
+      setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsProcessing(true);
-      setVolumes([0, 0, 0, 0, 0]);
-      if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
   };
 
-  const processAudio = async (audioBlob: Blob) => {
-    const base64Audio = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = (reader.result as string).split(",")[1];
-        resolve(base64);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(audioBlob);
-    });
+  const processAudio = async (blob: Blob) => {
+    setIsProcessing(true);
+    setError("");
 
     try {
-      const response = await fetch("/api/vent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audio: base64Audio,
-          mimeType: audioBlob.type || "audio/webm",
-        }),
-      });
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result as string;
 
-      if (!response.ok) throw new Error("Failed to process your reflection.");
-      
-      const data = await response.json();
+        try {
+          const response = await fetch("/api/vent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ audio: base64Audio }),
+          });
 
-      if (data.isCrisis) {
-        setIsCrisis(true);
-        setIsProcessing(false);
-        return;
-      }
+          const data = await response.json();
 
-      setTranscript(data.transcript);
-      setReply(data.reply);
-      setVentContext(data.transcript);
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to process audio.");
+          }
+
+          if (data.isCrisis) {
+            setIsCrisis(true);
+            return;
+          }
+
+          setTranscript(data.transcript || "");
+          setReply(data.reply || "");
+          if (data.transcript) {
+            setVentContext(data.transcript);
+          }
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            setError(err.message || "An unexpected error occurred.");
+          } else {
+            setError("An unexpected error occurred.");
+          }
+        } finally {
+          setIsProcessing(false);
+        }
+      };
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "An unexpected error occurred.");
+        setError(err.message || "An error occurred while reading audio.");
       } else {
-        setError("An unexpected error occurred.");
+        setError("An error occurred while reading audio.");
       }
-    } finally {
       setIsProcessing(false);
     }
   };
 
   const handleProcessWritten = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = writtenText.trim();
-    if (!trimmed) return;
+    if (!writtenText.trim()) return;
 
     setIsProcessing(true);
     setError("");
@@ -179,22 +207,23 @@ export default function Vent() {
       const response = await fetch("/api/vent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: trimmed }),
+        body: JSON.stringify({ text: writtenText.trim() }),
       });
-
-      if (!response.ok) throw new Error("Failed to reflect on your thoughts.");
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process written vent.");
+      }
+
       if (data.isCrisis) {
         setIsCrisis(true);
-        setIsProcessing(false);
         return;
       }
 
-      setTranscript(data.transcript);
-      setReply(data.reply);
-      setVentContext(data.transcript);
+      setTranscript(writtenText.trim());
+      setReply(data.reply || "");
+      setVentContext(writtenText.trim());
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
@@ -245,25 +274,32 @@ export default function Vent() {
   const formatTimer = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
     <main className={`page-container ${styles.container}`}>
-      <button 
-        className={styles.backButton} 
-        onClick={() => router.push("/")}
-        aria-label="Back to home"
-      >
-        <ArrowLeft className={styles.backIcon} strokeWidth={2} />
-      </button>
+      <div className={styles.topBar}>
+        <button 
+          type="button" 
+          className={styles.backButton} 
+          onClick={() => router.push("/")}
+          aria-label="Back to home"
+        >
+          <ChevronLeft size={16} />
+          <span>Home</span>
+        </button>
+        <span className={styles.protocolBadge}>
+          <Mic size={12} strokeWidth={2.2} /> Sensory Vent
+        </span>
+      </div>
 
       {/* 1. Crisis View */}
       {isCrisis ? (
         <section className={styles.crisisSection} aria-live="assertive">
           <div className={styles.crisisCard}>
             <div className={styles.crisisIconWrapper}>
-              <HeartHandshake className={styles.crisisIcon} strokeWidth={2} />
+              <HeartHandshake size={24} />
             </div>
             <h2 className={styles.crisisTitle}>A pause for something heavier</h2>
             <p className={styles.crisisIntro}>
@@ -277,13 +313,13 @@ export default function Vent() {
               </div>
               <div className={styles.resourceItem}>
                 <span className={styles.resourceName}>Crisis Text Line</span>
-                <span className={styles.resourceDetail}>Text <strong>HOME</strong> to <strong>741741</strong> to connect with a crisis counselor</span>
+                <span className={styles.resourceDetail}>Text <strong>HOME</strong> to <strong>741741</strong> to connect with a counselor</span>
               </div>
             </div>
 
             <div className={styles.crisisActions}>
-              <button className={styles.outlineBtn} onClick={handleReset}>
-                Go back
+              <button type="button" className={styles.outlineBtn} onClick={handleReset}>
+                Return to Vent
               </button>
             </div>
           </div>
@@ -291,81 +327,109 @@ export default function Vent() {
       ) : !transcript && !reply ? (
         /* 2. Recording / Input View */
         <section className={styles.recordingSection}>
-          <AudioAnchorControl style={{ marginBottom: "16px" }} />
-          {/* Sensory Mode Toggle: Voice vs Text */}
-          <div className={styles.modeTabs}>
-            <button
-              type="button"
-              className={`${styles.tabBtn} ${inputMode === "voice" ? styles.tabActive : ""}`}
-              onClick={() => setInputMode("voice")}
-            >
-              <Mic size={14} /> Voice
-            </button>
-            <button
-              type="button"
-              className={`${styles.tabBtn} ${inputMode === "text" ? styles.tabActive : ""}`}
-              onClick={() => setInputMode("text")}
-            >
-              Write
-            </button>
+          <header className={styles.header}>
+            <h1 className={styles.pageTitle}>Unfiltered Sensory Vent</h1>
+            <p className={styles.pageSubtitle}>
+              Speak or write freely in a quiet, private space. No judgment, no destination.
+            </p>
+          </header>
+
+          <div className={styles.topControls}>
+            <AudioAnchorControl />
+            <div className={styles.modeSwitch} role="tablist">
+              <button
+                type="button"
+                className={`${styles.modeSwitchBtn} ${inputMode === "voice" ? styles.activeMode : ""}`}
+                onClick={() => setInputMode("voice")}
+                role="tab"
+                aria-selected={inputMode === "voice"}
+              >
+                <Mic size={14} />
+                <span>Voice Journal</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.modeSwitchBtn} ${inputMode === "text" ? styles.activeMode : ""}`}
+                onClick={() => setInputMode("text")}
+                role="tab"
+                aria-selected={inputMode === "text"}
+              >
+                <Edit3 size={14} />
+                <span>Written Vent</span>
+              </button>
+            </div>
           </div>
 
           {inputMode === "voice" ? (
-            <>
-              <div className={styles.micWrapper}>
-                <div className={`${styles.visualizer} ${isRecording ? styles.active : ""}`}>
+            <div className={styles.voicePanel}>
+              {/* Soft Waveform Metering */}
+              <div className={styles.meterContainer}>
+                <div className={styles.visualizerBars}>
                   {volumes.map((vol, i) => (
                     <div 
                       key={i} 
-                      className={styles.bar} 
-                      style={{ transform: `scaleY(${Math.max(0.2, vol * 1.5)})` }}
+                      className={styles.meterBar} 
+                      style={{ height: `${Math.max(14, Math.min(100, vol * 100))}%` }}
                     />
                   ))}
                 </div>
-                
-                <button 
-                  type="button"
-                  className={`${styles.micButton} ${isRecording ? styles.recording : ""} ${isProcessing ? styles.processing : ""}`}
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={isProcessing}
-                  aria-label={isRecording ? "Stop listening" : "Start speaking"}
-                >
-                  <Mic strokeWidth={2.5} className={styles.micIcon} />
-                </button>
-                
-                {!isRecording && !isProcessing && <div className={styles.ambientRing} />}
-              </div>
-
-              {isRecording && (
-                <div className={styles.timerBadge}>
-                  <span className={styles.recordingDot} />
-                  <span>{formatTimer(recordSeconds)}</span>
+                <div className={styles.timerRow}>
+                  <span className={styles.timerDisplay}>
+                    {formatTimer(recordSeconds)} / 01:00
+                  </span>
+                  <span className={styles.statusDisplay}>
+                    {isProcessing ? "Reflecting on your words..." : isRecording ? "Listening closely..." : "Ready when you are"}
+                  </span>
                 </div>
-              )}
-
-              <div className={styles.statusText}>
-                {isProcessing ? "Reflecting on your words..." : isRecording ? "I'm listening..." : "Tap to speak freely"}
               </div>
-            </>
+
+              <div className={styles.voiceActionRow}>
+                {!isRecording ? (
+                  <button 
+                    type="button"
+                    className={styles.primaryActionBtn}
+                    onClick={startRecording}
+                    disabled={isProcessing}
+                  >
+                    <Mic size={16} />
+                    <span>Begin Voice Recording</span>
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    className={`${styles.primaryActionBtn} ${styles.recordingActionBtn}`}
+                    onClick={stopRecording}
+                  >
+                    <Square size={16} />
+                    <span>Stop &amp; Reflect</span>
+                  </button>
+                )}
+              </div>
+            </div>
           ) : (
             /* Written Vent Mode */
             <form onSubmit={handleProcessWritten} className={styles.textVentForm}>
-              <textarea
-                className={styles.textVentArea}
-                placeholder="What is spinning in your mind right now? Let it out..."
-                value={writtenText}
-                onChange={(e) => setWrittenText(e.target.value)}
-                disabled={isProcessing}
-                autoFocus
-                rows={5}
-                aria-label="Written vent thoughts"
-              />
-              <button
-                type="submit"
-                className={styles.textVentSubmitBtn}
+              <div className={styles.deskInputPanel}>
+                <div className={styles.deskHeader}>
+                  <span className={styles.deskLabel}>Private Stream of Consciousness</span>
+                </div>
+                <textarea
+                  className={styles.textVentArea}
+                  placeholder="What is spinning in your mind right now? Unload it completely..."
+                  value={writtenText}
+                  onChange={(e) => setWrittenText(e.target.value)}
+                  disabled={isProcessing}
+                  autoFocus
+                  rows={6}
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className={styles.primaryActionBtn}
                 disabled={isProcessing || !writtenText.trim()}
               >
-                {isProcessing ? "Reflecting..." : "Reflect"}
+                {isProcessing ? "Reflecting on thoughts..." : "Reflect on Vent"}
               </button>
             </form>
           )}
@@ -373,53 +437,48 @@ export default function Vent() {
           {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       ) : (
-        /* 3. Reflection Result */
-        <section className={styles.resultSection}>
-          <div className={styles.replyCard}>
-            <p className={styles.replyText}>{reply}</p>
-          </div>
-          
-          <div className={styles.transcriptCard}>
-            <h3>What you shared:</h3>
-            <p>{transcript}</p>
+        /* 3. Output Reflection View */
+        <section className={styles.reflectionSection}>
+          <div className={styles.transcriptBlock}>
+            <span className={styles.blockKicker}>What you expressed</span>
+            <p className={styles.transcriptQuote}>&ldquo;{transcript}&rdquo;</p>
           </div>
 
-          <div className={styles.actions}>
-            <button 
+          <div className={styles.replyBlock}>
+            <span className={styles.blockKicker}>Grounding Perspective</span>
+            <div className={styles.replyText}>
+              {reply.split("\n\n").map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.actionRow}>
+            <button
               type="button"
-              className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
+              className={styles.saveBtn}
               onClick={handleSaveReflection}
               disabled={saving || saved}
             >
               {saved ? (
                 <>
-                  <Check size={16} />
-                  <span>Saved to Reflections</span>
+                  <Check size={15} />
+                  <span>Saved to history</span>
                 </>
               ) : (
                 <>
-                  <Bookmark size={16} />
+                  <Bookmark size={15} />
                   <span>{saving ? "Saving..." : "Save privately"}</span>
                 </>
               )}
             </button>
-
-            <button 
-              type="button"
-              className={styles.outlineBtn} 
-              onClick={() => router.push("/overwhelmed")}
-            >
-              Help me break this into steps
-            </button>
-
-            <button 
-              type="button"
-              className={styles.textBtn} 
-              onClick={handleReset}
-            >
-              Start over
+            <button type="button" className={styles.outlineBtn} onClick={handleReset}>
+              <RefreshCw size={14} />
+              <span>New vent session</span>
             </button>
           </div>
+
+          {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       )}
     </main>
