@@ -1,33 +1,64 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parseJsonFromLLM } from "@/lib/utils";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { checkSafety } from "@/lib/safety";
 
 export const maxDuration = 60; // Allow up to 60s for Vercel Serverless Function
 
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  const ip = getClientIp(req);
   if (!checkRateLimit(ip)) {
     return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   }
 
   try {
-    const { task } = await req.json();
+    const { task, save, steps: explicitSteps } = await req.json();
 
-    if (!task) {
+    // Opt-in save action
+    if (save && task && Array.isArray(explicitSteps)) {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error: dbError } = await supabase
+        .from("task_chunks")
+        .insert([{ 
+          original_task: task.trim(), 
+          steps: explicitSteps,
+          user_id: user?.id || null
+        }]);
+        
+      if (dbError) {
+        console.error("Failed to save to Supabase:", dbError);
+        return NextResponse.json({ error: "Could not save task breakdown." }, { status: 500 });
+      }
+
+      return NextResponse.json({ saved: true });
+    }
+
+    if (!task || typeof task !== "string" || !task.trim()) {
       return NextResponse.json({ error: "Task is required" }, { status: 400 });
+    }
+
+    const trimmedTask = task.trim();
+
+    // Deterministic Safety Check
+    const safety = checkSafety(trimmedTask);
+    if (safety.isCrisis) {
+      return NextResponse.json({ isCrisis: true });
     }
 
     const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
     if (!DEEPSEEK_API_KEY) {
-      console.error("Missing DEEPSEEK_API_KEY environment variable");
-      // Fallback for development without API key
       return NextResponse.json({ 
+        isCrisis: false,
+        energyLevel: "Low",
         steps: [
-          "Stand up from your current position.",
-          "Identify one physical item related to this task.",
-          "Move that item to its correct place."
+          "Take a deep breath and touch one item related to this task.",
+          "Clear a 12-inch space directly in front of you.",
+          "Spend just 3 minutes on the easiest initial action.",
+          "Step back and acknowledge the momentum."
         ] 
       });
     }
@@ -39,19 +70,27 @@ export async function POST(req: Request) {
         "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "deepseek-chat", // DeepSeek V4 Flash equivalent
+        model: "deepseek-chat",
         messages: [
           {
             role: "system",
-            content: "You are an ADHD executive dysfunction assistant. The user will give you a broad, overwhelming task. Your job is to break it down into exactly 3 to 5 highly actionable, immediate physical micro-steps. Do not provide any conversational filler, greetings, or conclusions. Only return a JSON object with a 'steps' key containing an array of strings representing the steps. Make them very simple and physically actionable (e.g. 'Grab a trash bag')."
+            content: `You are an ADHD executive dysfunction specialist. The user is feeling paralyzed by a broad, daunting task.
+Your goal is to break it down into 3 to 5 micro-steps focused on friction reduction.
+Rule 1: The very first step MUST be a zero-friction gateway action (e.g. "Pick up one piece of paper", "Open the laptop lid and don't type yet").
+Rule 2: Estimate the physical/emotional energy level needed for this breakdown: "Very Low", "Low", or "Medium".
+Respond ONLY with a JSON object with this schema:
+{
+  "energyLevel": "Low",
+  "steps": ["Step 1", "Step 2", "Step 3"]
+}`
           },
           {
             role: "user",
-            content: task
+            content: trimmedTask
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 200,
+        max_tokens: 300,
         temperature: 0.3
       })
     });
@@ -63,35 +102,17 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
-    let steps = [];
+    let steps: string[] = [];
+    let energyLevel = "Low";
     
     try {
       const content = data.choices[0].message.content;
       const parsed = parseJsonFromLLM(content);
-      if (Array.isArray(parsed)) {
-        steps = parsed;
-      } else if (parsed.steps && Array.isArray(parsed.steps)) {
+      if (parsed.energyLevel) energyLevel = parsed.energyLevel;
+      if (Array.isArray(parsed.steps)) {
         steps = parsed.steps;
-      } else {
-        steps = Object.values(parsed).find(v => Array.isArray(v)) || [];
-      }
-      
-      // Save to Supabase
-      if (steps.length > 0) {
-        const supabase = await createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        const { error: dbError } = await supabase
-          .from("task_chunks")
-          .insert([{ 
-            original_task: task, 
-            steps,
-            user_id: session?.user?.id || null
-          }]);
-          
-        if (dbError) {
-          console.error("Failed to save to Supabase:", dbError);
-        }
+      } else if (Array.isArray(parsed)) {
+        steps = parsed;
       }
     } catch (e) {
       console.error("Failed to parse LLM response as JSON:", e);
@@ -101,7 +122,12 @@ export async function POST(req: Request) {
         .filter((line: string) => line.length > 0);
     }
 
-    return NextResponse.json({ steps: steps.slice(0, 5) });
+    // Ephemeral by default — do not auto-save to DB
+    return NextResponse.json({ 
+      isCrisis: false,
+      energyLevel,
+      steps: steps.slice(0, 5) 
+    });
 
   } catch (error) {
     console.error("Error in chunk-task route:", error);

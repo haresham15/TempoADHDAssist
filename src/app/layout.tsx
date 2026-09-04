@@ -7,8 +7,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Tempo | Intent-Driven Support",
-  description: "AI-powered digital therapeutic tool designed specifically for the ADHD brain.",
+  title: "Tempo | RSD Communication Buffer & Pattern Insights",
+  description: "AI-assisted communication, self-awareness, and emotional regulation tool for rejection-sensitive moments.",
   icons: {
     icon: [
       { url: '/favicon.ico' },

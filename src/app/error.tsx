@@ -22,14 +22,15 @@ export default function ErrorBoundary({
       
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: "1.5rem", marginTop: "-10vh" }}>
         <h1 style={{ fontSize: "1.5rem", color: "var(--text-primary)", fontWeight: 500 }}>
-          Something didn't quite work.
+          Something didn&apos;t quite work.
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.5, maxWidth: "400px" }}>
-          We hit a snag processing that. It's completely okay—take a breath, and we can try again when you're ready.
+          We hit a snag processing that. It&apos;s completely okay—take a breath, and we can try again when you&apos;re ready.
         </p>
         
         <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
           <button 
+            type="button"
             onClick={() => reset()}
             style={{
               padding: "0.75rem 1.5rem",
@@ -47,10 +48,11 @@ export default function ErrorBoundary({
           
           <Link href="/">
             <button 
+              type="button"
               style={{
                 padding: "0.75rem 1.5rem",
                 borderRadius: "999px",
-                border: "2px solid var(--border-light)",
+                border: "1px solid var(--border-hairline)",
                 background: "transparent",
                 color: "var(--text-primary)",
                 fontWeight: 500,

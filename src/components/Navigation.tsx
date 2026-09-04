@@ -2,23 +2,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Clock, Settings } from "lucide-react";
+import { Home, MessagesSquare, Sparkles } from "lucide-react";
 import styles from "./Navigation.module.css";
 
 export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className={styles.navBar}>
+    <nav className={styles.navBar} aria-label="Main navigation">
       <div className={styles.navInner}>
-        <Link href="/" className={`${styles.navItem} ${pathname === "/" ? styles.active : ""}`}>
-          <Home className={styles.icon} strokeWidth={pathname === "/" ? 2.5 : 1.75} />
+        <Link 
+          href="/" 
+          className={`${styles.navItem} ${pathname === "/" ? styles.active : ""}`}
+          aria-label="Home Intent Hub"
+          title="Home"
+        >
+          <Home className={styles.icon} strokeWidth={pathname === "/" ? 2.3 : 1.7} />
+          <span className={styles.navLabel}>Home</span>
         </Link>
-        <Link href="/history" className={`${styles.navItem} ${pathname === "/history" ? styles.active : ""}`}>
-          <Clock className={styles.icon} strokeWidth={pathname === "/history" ? 2.5 : 1.75} />
+
+        <Link 
+          href="/triggered" 
+          className={`${styles.navItem} ${pathname === "/triggered" ? styles.active : ""}`}
+          aria-label="RSD Communication Buffer"
+          title="RSD Buffer"
+        >
+          <MessagesSquare className={styles.icon} strokeWidth={pathname === "/triggered" ? 2.3 : 1.7} />
+          <span className={styles.navLabel}>Buffer</span>
         </Link>
-        <Link href="/settings" className={`${styles.navItem} ${pathname === "/settings" ? styles.active : ""}`}>
-          <Settings className={styles.icon} strokeWidth={pathname === "/settings" ? 2.5 : 1.75} />
+
+        <Link 
+          href="/history" 
+          className={`${styles.navItem} ${pathname === "/history" ? styles.active : ""}`}
+          aria-label="History and Pattern Insights"
+          title="Insights"
+        >
+          <Sparkles className={styles.icon} strokeWidth={pathname === "/history" ? 2.3 : 1.7} />
+          <span className={styles.navLabel}>Insights</span>
         </Link>
       </div>
     </nav>

@@ -1,148 +1,59 @@
 "use client";
 
-import { Sun, Moon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Sliders, CheckCircle2 } from "lucide-react";
 import BrandHeader from "@/components/BrandHeader";
 import styles from "./page.module.css";
-import { useTempo } from "@/lib/TempoContext";
 
 export default function Settings() {
-  const { 
-    userName, setUserName,
-    motion, setMotion,
-    sound, setSound,
-    contrast, setContrast,
-    textSize, setTextSize,
-    theme, setTheme 
-  } = useTempo();
+  const router = useRouter();
 
   return (
     <main className={`page-container ${styles.container}`}>
       <BrandHeader />
-      <header className={styles.header}>
-        <h1 className={styles.title}>Settings</h1>
-        <p className={styles.subtitle}>Personalize your calm space.</p>
-      </header>
+      
+      <div className={styles.backWrapper}>
+        <button 
+          className={styles.backButton} 
+          onClick={() => router.push("/")}
+          aria-label="Back to home"
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Tempo</span>
+        </button>
+      </div>
 
-      <section className={styles.settingsList}>
+      <section className={styles.deferredCard}>
+        <div className={styles.iconCircle}>
+          <Sliders size={28} strokeWidth={1.8} />
+        </div>
+        <h1 className={styles.deferredTitle}>Settings are Deferred in V2</h1>
         
-        {/* Name */}
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <h3>Your Name</h3>
-            <p>How we greet you on the Intent Hub</p>
+        <p className={styles.deferredText}>
+          To maintain absolute trust, Tempo does not show decorative controls that lack real persistence. In V1, the app automatically and honestly honors your system preferences:
+        </p>
+
+        <div className={styles.featureList}>
+          <div className={styles.featureItem}>
+            <CheckCircle2 size={18} className={styles.featureIcon} />
+            <div>
+              <strong>Low-Stimulation Theme:</strong> Respects your system dark mode or light warm ivory palette automatically.
+            </div>
           </div>
-          <input 
-            type="text" 
-            placeholder="Friend"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            className={styles.textInput}
-          />
-        </div>
-        
-        {/* Motion */}
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <h3>Motion</h3>
-            <p>Background drift and transitions</p>
-          </div>
-          <div className={styles.pillSelector}>
-            {["full", "reduced", "none"].map(opt => (
-              <button 
-                key={opt}
-                className={`${styles.pillBtn} ${motion === opt ? styles.activePill : ""}`}
-                onClick={() => setMotion(opt)}
-              >
-                {opt.charAt(0).toUpperCase() + opt.slice(1)}
-              </button>
-            ))}
+          <div className={styles.featureItem}>
+            <CheckCircle2 size={18} className={styles.featureIcon} />
+            <div>
+              <strong>Reduced Motion:</strong> Fully disables all ambient background drift and transitions when system <code>prefers-reduced-motion</code> is active.
+            </div>
           </div>
         </div>
 
-        {/* Sound Cues */}
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <h3>Sound cues</h3>
-            <p>Soft chime on task completion</p>
-          </div>
-          <label className={styles.toggleSwitch}>
-            <input 
-              type="checkbox" 
-              checked={sound} 
-              onChange={() => setSound(!sound)} 
-            />
-            <span className={styles.slider}></span>
-          </label>
-        </div>
-
-        {/* Contrast */}
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <h3>Contrast</h3>
-            <p>Make text stand out more</p>
-          </div>
-          <div className={styles.pillSelector}>
-            <button 
-              className={`${styles.pillBtn} ${contrast === "standard" ? styles.activePill : ""}`}
-              onClick={() => setContrast("standard")}
-            >
-              Standard
-            </button>
-            <button 
-              className={`${styles.pillBtn} ${contrast === "high" ? styles.activePill : ""}`}
-              onClick={() => setContrast("high")}
-            >
-              High Contrast
-            </button>
-          </div>
-        </div>
-
-        {/* Text Size */}
-        <div className={styles.settingRowBlock}>
-          <div className={styles.settingInfo}>
-            <h3>Text size</h3>
-            <p style={{ fontSize: textSize === 0 ? '1rem' : textSize === 1 ? '1.1rem' : '1.25rem' }}>
-              This is how your text will look.
-            </p>
-          </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="2" 
-            step="1" 
-            value={textSize}
-            onChange={(e) => setTextSize(parseInt(e.target.value))}
-            className={styles.rangeSlider}
-          />
-          <div className={styles.rangeLabels}>
-            <span>Comfortable</span>
-            <span>Large</span>
-            <span>Extra Large</span>
-          </div>
-        </div>
-
-        {/* Theme */}
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <h3>Theme</h3>
-            <p>Switch to Low-Stim Night mode</p>
-          </div>
-          <div className={styles.themeToggle}>
-            <button 
-              className={`${styles.themeBtn} ${theme === "light" ? styles.activeTheme : ""}`}
-              onClick={() => setTheme("light")}
-            >
-              <Sun strokeWidth={2} className={styles.themeIcon} />
-            </button>
-            <button 
-              className={`${styles.themeBtn} ${theme === "dark" ? styles.activeTheme : ""}`}
-              onClick={() => setTheme("dark")}
-            >
-              <Moon strokeWidth={2} className={styles.themeIcon} />
-            </button>
-          </div>
-        </div>
-
+        <button 
+          className={styles.homeBtn}
+          onClick={() => router.push("/")}
+        >
+          Return to Flagship Buffer
+        </button>
       </section>
     </main>
   );

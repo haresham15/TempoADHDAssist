@@ -89,7 +89,7 @@ export function TempoProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("tempo_userName", userName);
     if (userId) {
       const supabase = createClient();
-      supabase.from("user_settings").update({ user_name: userName, updated_at: new Date().toISOString() }).eq("user_id", userId).then();
+      supabase.from("user_settings").update({ user_name: userName, updated_at: new Date().toISOString() }).eq("user_id", userId).then(undefined, () => {});
     }
   }, [userName, isLoaded, userId]);
 
@@ -99,7 +99,7 @@ export function TempoProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute("data-motion", motion);
     if (userId) {
       const supabase = createClient();
-      supabase.from("user_settings").update({ motion, updated_at: new Date().toISOString() }).eq("user_id", userId).then();
+      supabase.from("user_settings").update({ motion, updated_at: new Date().toISOString() }).eq("user_id", userId).then(undefined, () => {});
     }
   }, [motion, isLoaded, userId]);
 
@@ -120,7 +120,7 @@ export function TempoProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute("data-textsize", textSize.toString());
     if (userId) {
       const supabase = createClient();
-      supabase.from("user_settings").update({ text_size: textSize.toString(), updated_at: new Date().toISOString() }).eq("user_id", userId).then();
+      supabase.from("user_settings").update({ text_size: textSize.toString(), updated_at: new Date().toISOString() }).eq("user_id", userId).then(undefined, () => {});
     }
   }, [textSize, isLoaded, userId]);
 
@@ -130,7 +130,7 @@ export function TempoProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute("data-theme", theme);
     if (userId) {
       const supabase = createClient();
-      supabase.from("user_settings").update({ theme, updated_at: new Date().toISOString() }).eq("user_id", userId).then();
+      supabase.from("user_settings").update({ theme, updated_at: new Date().toISOString() }).eq("user_id", userId).then(undefined, () => {});
     }
   }, [theme, isLoaded, userId]);
 

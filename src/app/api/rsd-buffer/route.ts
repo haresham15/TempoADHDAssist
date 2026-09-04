@@ -1,34 +1,59 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { parseJsonFromLLM } from "@/lib/utils";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { checkSafety } from "@/lib/safety";
 
 export const maxDuration = 60; // Allow up to 60s for Vercel Serverless Function
 
+const MAX_INPUT_LENGTH = 3000;
+
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  const ip = getClientIp(req);
   if (!checkRateLimit(ip)) {
-    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please take a moment and try again later." },
+      { status: 429 }
+    );
   }
 
   try {
-    const { message } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const rawMessage = body?.message;
 
-    if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    // 1. Validation: check presence and length
+    if (!rawMessage || typeof rawMessage !== "string" || !rawMessage.trim()) {
+      return NextResponse.json(
+        { error: "Please enter a message to review." },
+        { status: 400 }
+      );
     }
 
+    const message = rawMessage.trim();
+    if (message.length > MAX_INPUT_LENGTH) {
+      return NextResponse.json(
+        { error: `Message exceeds the ${MAX_INPUT_LENGTH.toLocaleString()} character limit.` },
+        { status: 400 }
+      );
+    }
+
+    // 2. Deterministic Safety Check (non-AI, zero model calls, zero database writes)
+    const safety = checkSafety(message);
+    if (safety.isCrisis) {
+      return NextResponse.json({
+        isCrisis: true
+      });
+    }
+
+    // 3. Model call (DeepSeek, JSON mode)
     const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
     if (!DEEPSEEK_API_KEY) {
-      console.error("Missing DEEPSEEK_API_KEY environment variable");
-      // Fallback for development without API key
-      return NextResponse.json({ 
-        neutralTranslation: "This is a placeholder translation since no API key was provided. I hear what you are saying and I will respond when I have time.",
-        distortions: [
-          { name: "Mind Reading", explanation: "Assuming you know what the other person is thinking." },
-          { name: "Catastrophizing", explanation: "Expecting the worst possible outcome." }
-        ]
+      console.warn("Missing DEEPSEEK_API_KEY environment variable. Using fallback response.");
+      return NextResponse.json({
+        isCrisis: false,
+        emotion: "It makes complete sense that this feels sharp and unsettling right now.",
+        pattern: "Your brain jumped to the worst-case version",
+        translation: "Could you please clarify what you meant? I want to make sure we're on the same page."
       });
     }
 
@@ -43,10 +68,11 @@ export async function POST(req: Request) {
         messages: [
           {
             role: "system",
-            content: `You are an empathetic mediator. The user is experiencing Rejection Sensitive Dysphoria (RSD).
-Respond in JSON format with exactly two keys:
-1. "emotion": A warm, validating, one-line reflection of the emotion the user is feeling based on the message. Do not use clinical terms like "cognitive distortion". (e.g., "It makes complete sense that you feel hurt and overlooked by this.")
-2. "translation": A calmer, more objective version of the message they can send, or a neutral interpretation of what was said to them. Keep it clear, polite, and boundaries-focused.`
+            content: `You are an empathetic communication coach. The user is experiencing Rejection Sensitive Dysphoria (RSD) after reading or drafting a high-emotion message.
+Respond in JSON format with exactly three keys:
+1. "emotion": A warm, validating, one-line reflection of the feeling the user is experiencing. Do not use clinical, diagnostic, or therapeutic jargon. (e.g., "It makes complete sense that you feel hurt and dismissed by that brief reply.")
+2. "pattern": A concise (under 10 words), plain-language name for the thinking pattern at work. This teaches pattern recognition without clinical terms. (e.g., "Your brain jumped to the worst-case version", "Filling in silence with perceived anger", "Treating brevity as rejection")
+3. "translation": A calmer, clearer, editable rewording of the message that communicates effectively while maintaining calm boundaries.`
           },
           {
             role: "user",
@@ -54,58 +80,37 @@ Respond in JSON format with exactly two keys:
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 400,
+        max_tokens: 450,
         temperature: 0.3
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("DeepSeek API error:", errorText);
-      throw new Error(`DeepSeek API returned status ${response.status}`);
+      console.error("DeepSeek API error:", response.status, errorText);
+      throw new Error(`Model API returned status ${response.status}`);
     }
 
     const data = await response.json();
-    const result = {
-      emotion: "",
-      translation: ""
-    };
-    
-    try {
-      const content = data.choices[0].message.content;
-      const rsdData = parseJsonFromLLM(content);
-      result.emotion = rsdData.emotion || "It makes sense that this feels overwhelming right now.";
-      result.translation = rsdData.translation || "Could you please clarify what you meant?";
-      
-      // Save to Supabase
-      if (result.translation) {
-        const supabase = await createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        const { error: dbError } = await supabase
-          .from("rsd_logs")
-          .insert([{ 
-            original_message: message, 
-            neutral_translation: result.translation, 
-            distortions: { emotion: result.emotion },
-            user_id: session?.user?.id || null
-          }]);
-          
-        if (dbError) {
-          console.error("Failed to save to Supabase:", dbError);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse LLM response as JSON:", e);
-      result.translation = "An error occurred while parsing the response. Please try again.";
-    }
+    const content = data.choices?.[0]?.message?.content || "{}";
+    const rsdData = parseJsonFromLLM(content);
 
-    return NextResponse.json(result);
+    const emotion = rsdData.emotion?.trim() || "It makes complete sense that this feels overwhelming right now.";
+    const pattern = rsdData.pattern?.trim() || "Your brain jumped to the worst-case version";
+    const translation = rsdData.translation?.trim() || "Could you clarify what you meant? I want to ensure I understood.";
 
-  } catch (error) {
-    console.error("Error in rsd-buffer route:", error);
+    // 4. Return, do not persist. Ephemeral by default.
+    return NextResponse.json({
+      isCrisis: false,
+      emotion,
+      pattern,
+      translation
+    });
+
+  } catch (err: unknown) {
+    console.error("RSD Buffer error:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "We encountered a hiccup processing that. Please try again." },
       { status: 500 }
     );
   }

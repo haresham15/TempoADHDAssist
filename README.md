@@ -1,23 +1,42 @@
-# Tempo: Intent-Driven Support for ADHD
+# Tempo — RSD Communication Buffer (V2: Narrowed & Hardened)
 
-Tempo is an AI-powered digital therapeutic tool designed specifically for the ADHD brain. Unlike traditional productivity apps that rely on high-friction data entry and guilt-based gamification, Tempo uses an intent-driven interface to lower cognitive load. 
+Tempo is an AI-assisted communication and self-awareness tool built for the moment right before a rejection-sensitive reaction gets sent — the pasted message someone drafted in anger, or the message someone else sent that landed harder than it was probably meant to.
 
-It leverages high-speed, cost-efficient Large Language Models (LLMs) to address three core pillars of ADHD struggles: Rejection Sensitive Dysphoria (RSD), executive dysfunction (task paralysis), and social/emotional burnout.
+Tempo is positioned honestly as a **communication coach and reframing tool**, not a therapeutic, diagnostic, or clinical product.
 
-## Core Features
+---
 
-- **🧩 Task Chunker (Executive Dysfunction)**: Uses DeepSeek to break down broad, overwhelming tasks into 3-5 highly actionable, immediate physical micro-steps.
-- **🛡️ Communication Buffer (RSD)**: Analyzes emotionally charged messages (received or drafted) using DeepSeek CBT protocols to extract an emotionally neutral translation and flag cognitive distortions.
-- **🎙️ Safe Venting Space (Emotional Burnout)**: A voice-first journal using Gemini Multimodal AI. It provides a judgment-free zone to vent, offering short, validating responses without unsolicited advice.
+## Why V2 (Narrowed & Hardened)
+
+A rigorous audit of the original three-module concept prompted a deliberate scope cut:
+1. **Competitive focus:** The Task Chunker directly duplicated existing free community tools (such as Goblin Tools). By contrast, the RSD Communication Buffer has no equivalent direct competitor and solves a high-acuity problem for rejection-sensitive adults.
+2. **Clinical & regulatory safety:** The Voice Journal delivered unsupervised guidance without crisis detection. The RSD Buffer sits in materially safer territory and is hardened with a **deterministic, non-AI crisis-language safety layer** before any model sees user text.
+3. **Trust & privacy by default:** Database access is secured with strict Row Level Security (RLS) with zero public read permissions. Generation is **100% ephemeral by default** — nothing is saved to a database unless the user explicitly opts in with the "Save privately" action.
+
+---
+
+## Core Product Principles
+
+- **Zero-Friction Entry:** One text field, one button. No account required to reword a message.
+- **Teach the Pattern, Don't Just Soothe It:** Every result names the underlying thinking pattern in plain language (e.g. *"Your brain jumped to the worst-case version"*), helping users build long-term awareness.
+- **Private by Default:** Ephemeral processing. Nothing is persisted unless explicitly saved.
+- **Safety Before Helpfulness:** A deterministic, regex-based check intercepts crisis language before model invocation, routing users to real support (988 and Crisis Text Line).
+- **State-Dependent, Low-Stimulation UI:** Warm ivory palette (`#FAF6F0`), lavender accent (`#B5A8D1`), no alarm/red colors (even for crisis states), and full respect for system dark mode and `prefers-reduced-motion`.
+
+---
 
 ## Architecture & Tech Stack
 
-Tempo is built with a highly efficient, serverless architecture optimized for a solo builder:
-- **Framework**: [Next.js (App Router)](https://nextjs.org/)
-- **Styling**: Vanilla CSS with premium glassmorphism aesthetics.
-- **AI Models**: [DeepSeek](https://deepseek.com) (Text/Reasoning) and [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/) (Multimodal Audio).
-- **Backend**: Native Next.js API Routes (Serverless Functions) integrated with `maxDuration` scaling.
-- **Database / Auth**: [Supabase](https://supabase.com/) (Scaffolded and ready for expansion).
+- **Framework:** Next.js (App Router, React 19)
+- **Styling:** Vanilla CSS Modules with design tokens in `globals.css`
+- **Model:** DeepSeek (`deepseek-chat`, JSON mode) returning emotion reflection, thinking pattern, and calmer translation
+- **Safety Layer:** `src/lib/safety.ts` — dependency-free, deterministic crisis-language pattern matcher
+- **Database & Security:** Supabase (Postgres) with Row Level Security (RLS) granting insert-only privileges to guests and zero public read policies
+- **Endpoints:**
+  - `POST /api/rsd-buffer`: Validates input (max 3,000 chars), runs safety check, queries DeepSeek, returns ephemeral JSON response.
+  - `POST /api/rsd-buffer/save`: Dedicated opt-in save endpoint writing to `rsd_logs`.
+
+---
 
 ## Getting Started Locally
 
@@ -33,29 +52,25 @@ npm install
 ```
 
 ### 3. Environment Variables
-Create a `.env.local` file in the root directory and add the following keys:
+Create a `.env.local` file in the root directory:
 ```env
-# AI Models
+# DeepSeek API (Server-side only)
 DEEPSEEK_API_KEY=your_deepseek_api_key
-GEMINI_API_KEY_TEMPO=your_gemini_api_key
 
-# Supabase (Optional for V1 MVP, required for Auth/DB features)
+# Supabase (Server-side RLS & guest saves)
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### 4. Run the Development Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) with your browser to interact with the app.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Production Deployment
+---
 
-This project is optimized for deployment on Vercel's free tier. 
-1. Push your code to GitHub.
-2. Import the repository in your Vercel Dashboard.
-3. Paste the environment variables from your `.env.local` file into Vercel's Environment Variables settings.
-4. Deploy! 
-
-*Note: The API routes (`/api/chunk-task`, `/api/rsd-buffer`, `/api/vent`) are configured with `export const maxDuration = 60;` to ensure AI requests do not timeout under Vercel's default 10-15s serverless limits.*
+## Verification & Quality Gates
+Tempo maintains strict code hygiene:
+- `npm run lint`: Clean (0 errors, 0 warnings).
+- `npx tsc --noEmit`: Clean type checking.

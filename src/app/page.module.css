@@ -3,43 +3,43 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  min-height: calc(100vh - 4rem);
 }
 
 .header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   animation: fadeInDown 0.6s var(--easing) forwards;
 }
 
-.title {
+.greeting {
   font-size: 2.2rem;
   font-weight: 500;
-  color: var(--text-secondary); /* Quiet greeting */
-  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
 }
 
 .subtitle {
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   font-weight: 400;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 .intentList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   width: 100%;
-  max-width: 360px; /* Keep it focused on desktop */
+  max-width: 440px; /* Focused container */
 }
 
 .intentCard {
   width: 100%;
   border-radius: 20px;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
+  flex-direction: column;
+  gap: 0.6rem;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: var(--shadow-soft);
   cursor: pointer;
@@ -48,6 +48,7 @@
   animation: fadeInUp 0.6s var(--easing) forwards;
   opacity: 0;
   transform: translateY(10px);
+  position: relative;
 }
 
 /* Stagger animations */
@@ -55,70 +56,259 @@
 .intentCard:nth-child(2) { animation-delay: 0.2s; }
 .intentCard:nth-child(3) { animation-delay: 0.3s; }
 
-.cardOverwhelm {
-  background: #E5EDE7;
-  color: var(--text-primary);
+.cardHeaderRow {
+  display: flex;
+  justify-content: flex-start;
 }
-.cardOverwhelm .iconWrapper { color: #587F63; }
 
+.cardMainRow {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.flagshipBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(181, 168, 209, 0.35);
+  color: #4A3E66;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .flagshipBadge {
+    background: rgba(181, 168, 209, 0.25);
+    color: #DDD5ED;
+  }
+}
+
+.featureBadgeSage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(140, 175, 149, 0.25);
+  color: #37533E;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .featureBadgeSage {
+    background: rgba(140, 175, 149, 0.2);
+    color: #A9D1B3;
+  }
+}
+
+.featureBadgeBlush {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(232, 180, 160, 0.3);
+  color: #7A4633;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .featureBadgeBlush {
+    background: rgba(232, 180, 160, 0.2);
+    color: #ECC0AE;
+  }
+}
+
+.statusBadge {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .statusBadge {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Promoted Primary Flagship Styling */
 .cardTriggered {
   background: #EFEBF5;
   color: var(--text-primary);
+  border: 1.5px solid rgba(181, 168, 209, 0.5);
 }
-.cardTriggered .iconWrapper { color: #8777A3; }
 
-.cardVent {
-  background: #FBEEE8;
+.cardTriggered .iconWrapper {
+  color: #725F94;
+  background: rgba(181, 168, 209, 0.25);
+}
+
+.cardPrimary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(181, 168, 209, 0.25);
+  background: color-mix(in srgb, #EFEBF5 94%, black);
+}
+
+/* Sidelined / Deprioritized Modules */
+.cardDeprioritized {
+  opacity: 0.85;
+  border: 1px solid var(--border-hairline);
+  filter: grayscale(0.25);
+}
+
+.cardDeprioritized:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.cardOverwhelm {
+  background: #EBF1ED;
   color: var(--text-primary);
 }
-.cardVent .iconWrapper { color: #B37D66; }
-
-
-.intentCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.cardOverwhelm .iconWrapper {
+  color: #587F63;
+  background: rgba(88, 127, 99, 0.12);
 }
 
-.cardOverwhelm:hover { background: color-mix(in srgb, #E5EDE7 94%, black); }
-.cardTriggered:hover { background: color-mix(in srgb, #EFEBF5 94%, black); }
-.cardVent:hover { background: color-mix(in srgb, #FBEEE8 94%, black); }
+.cardVent {
+  background: #F8ECE7;
+  color: var(--text-primary);
+}
+.cardVent .iconWrapper {
+  color: #B37D66;
+  background: rgba(179, 125, 102, 0.12);
+}
 
 .iconWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: transform 0.18s ease-out;
 }
 
 .icon {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
+}
+
+.cardContent h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem 0;
+  color: var(--text-primary);
+}
+
+.cardContent p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .intentCard:hover .iconWrapper {
   transform: scale(1.06);
 }
 
-.intentCard:active {
-  transform: scale(0.98);
+/* Informational Notice Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+  animation: fadeIn 0.2s var(--easing) forwards;
 }
 
-.cardContent {
+.modalCard {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 460px;
+  width: 100%;
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1.25rem;
 }
 
-.cardContent h2 {
-  font-size: 1.25rem;
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
+  color: var(--text-primary);
 }
 
-.cardContent p {
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+}
+
+.modalText {
   font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--text-secondary);
   margin: 0;
+}
+
+.modalActionBtn {
+  align-self: flex-end;
+  background: var(--primary-sage);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--easing);
+}
+
+.modalActionBtn:hover {
+  background: color-mix(in srgb, var(--primary-sage) 92%, black);
 }
 
 @keyframes fadeInDown {
@@ -129,4 +319,9 @@
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

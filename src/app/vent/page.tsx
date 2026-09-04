@@ -3,9 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTempo } from "@/lib/TempoContext";
-import { ArrowLeft, Mic } from "lucide-react";
+import { ArrowLeft, Mic, HeartHandshake, Check, Bookmark } from "lucide-react";
 import styles from "./page.module.css";
-import { addHistory } from "@/lib/history";
 
 export default function Vent() {
   const router = useRouter();
@@ -16,6 +15,9 @@ export default function Vent() {
   const [transcript, setTranscript] = useState("");
   const [reply, setReply] = useState("");
   const [error, setError] = useState("");
+  const [isCrisis, setIsCrisis] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [volumes, setVolumes] = useState<number[]>([0, 0, 0, 0, 0]); // 5 bars
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -38,55 +40,60 @@ export default function Vent() {
     
     // Sample 5 distinct frequency bands
     const step = Math.floor(dataArray.length / 5);
-    const newVolumes = Array(5).fill(0).map((_, i) => {
-      let sum = 0;
-      for (let j = 0; j < step; j++) {
-        sum += dataArray[i * step + j];
-      }
-      return (sum / step) / 255; // Normalize 0 to 1
-    });
-
+    const newVolumes = [
+      dataArray[0] / 255,
+      dataArray[step] / 255,
+      dataArray[step * 2] / 255,
+      dataArray[step * 3] / 255,
+      dataArray[step * 4] / 255,
+    ];
     setVolumes(newVolumes);
+
     animationRef.current = requestAnimationFrame(updateWaveform);
   };
 
   const startRecording = async () => {
+    setError("");
+    chunksRef.current = [];
+
     try {
-      setError("");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Set up Audio Analyser
-      const audioCtx = new window.AudioContext();
-      audioContextRef.current = audioCtx;
+      // Setup AudioContext for live frequency visualizer
+      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 64;
-      analyserRef.current = analyser;
       const source = audioCtx.createMediaStreamSource(stream);
       source.connect(analyser);
 
-      const mediaRecorder = new MediaRecorder(stream);
+      audioContextRef.current = audioCtx;
+      analyserRef.current = analyser;
+
+      updateWaveform();
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
       };
 
-      mediaRecorder.onstop = async () => {
+      mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        await processAudio(audioBlob);
+        processAudio(audioBlob);
         
-        // Cleanup stream
-        stream.getTracks().forEach(track => track.stop());
+        // Stop audio tracks
+        stream.getTracks().forEach((track) => track.stop());
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
         if (audioContextRef.current) audioContextRef.current.close();
       };
 
       mediaRecorder.start();
       setIsRecording(true);
-      updateWaveform();
     } catch (err: unknown) {
-      setError("Microphone access is required to vent. Please allow permissions.");
+      setError("Microphone access is required to use the Voice Journal.");
       console.error(err);
     }
   };
@@ -101,7 +108,6 @@ export default function Vent() {
   };
 
   const processAudio = async (audioBlob: Blob) => {
-    // Convert Blob to Base64
     const base64Audio = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -115,47 +121,114 @@ export default function Vent() {
     try {
       const response = await fetch("/api/vent", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           audio: base64Audio,
           mimeType: audioBlob.type || "audio/webm",
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to process your vent.");
+      if (!response.ok) throw new Error("Failed to process your reflection.");
       
       const data = await response.json();
+
+      if (data.isCrisis) {
+        setIsCrisis(true);
+        setIsProcessing(false);
+        return;
+      }
+
       setTranscript(data.transcript);
       setReply(data.reply);
-      setVentContext(data.transcript); 
-      
-      addHistory({
-        type: "vent",
-        summary: `Vented for a moment`,
-        content: `Transcript: ${data.transcript}\n\nTempo: ${data.reply}`
-      });
+      setVentContext(data.transcript);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "An unexpected error occurred.");
       } else {
         setError("An unexpected error occurred.");
       }
+    } finally {
       setIsProcessing(false);
     }
   };
 
+  const handleSaveReflection = async () => {
+    if (saved || saving || !transcript) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/vent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          save: true,
+          transcript,
+          reply,
+        }),
+      });
+      if (res.ok) {
+        setSaved(true);
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    setIsCrisis(false);
+    setTranscript("");
+    setReply("");
+    setError("");
+    setSaved(false);
+    setIsProcessing(false);
+    setIsRecording(false);
+  };
+
   return (
     <main className={`page-container ${styles.container}`}>
-      <button className={styles.backButton} onClick={() => router.push("/")}>
+      <button 
+        className={styles.backButton} 
+        onClick={() => router.push("/")}
+        aria-label="Back to home"
+      >
         <ArrowLeft className={styles.backIcon} strokeWidth={2} />
       </button>
 
-      {!transcript && !reply ? (
+      {/* 1. Crisis View */}
+      {isCrisis ? (
+        <section className={styles.crisisSection} aria-live="assertive">
+          <div className={styles.crisisCard}>
+            <div className={styles.crisisIconWrapper}>
+              <HeartHandshake className={styles.crisisIcon} strokeWidth={2} />
+            </div>
+            <h2 className={styles.crisisTitle}>A pause for something heavier</h2>
+            <p className={styles.crisisIntro}>
+              It sounds like you may be carrying something really heavy right now. You don&apos;t have to navigate this alone.
+            </p>
+
+            <div className={styles.resourceList}>
+              <div className={styles.resourceItem}>
+                <span className={styles.resourceName}>988 Suicide &amp; Crisis Lifeline</span>
+                <span className={styles.resourceDetail}>Call or text <strong>988</strong> (Free, confidential, 24/7 in US &amp; Canada)</span>
+              </div>
+              <div className={styles.resourceItem}>
+                <span className={styles.resourceName}>Crisis Text Line</span>
+                <span className={styles.resourceDetail}>Text <strong>HOME</strong> to <strong>741741</strong> to connect with a crisis counselor</span>
+              </div>
+            </div>
+
+            <div className={styles.crisisActions}>
+              <button className={styles.outlineBtn} onClick={handleReset}>
+                Go back
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : !transcript && !reply ? (
+        /* 2. Recording View */
         <section className={styles.recordingSection}>
           <div className={styles.micWrapper}>
-            {/* Visualizer Bars */}
             <div className={`${styles.visualizer} ${isRecording ? styles.active : ""}`}>
               {volumes.map((vol, i) => (
                 <div 
@@ -166,42 +239,75 @@ export default function Vent() {
               ))}
             </div>
             
-            {/* Mic Button */}
             <button 
+              type="button"
               className={`${styles.micButton} ${isRecording ? styles.recording : ""} ${isProcessing ? styles.processing : ""}`}
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isProcessing}
+              aria-label={isRecording ? "Stop listening" : "Start speaking"}
             >
               <Mic strokeWidth={2.5} className={styles.micIcon} />
             </button>
             
-            {/* Ambient Ring for when idle */}
             {!isRecording && !isProcessing && <div className={styles.ambientRing} />}
           </div>
 
           <div className={styles.statusText}>
-            {isProcessing ? "Finding the words..." : isRecording ? "I'm listening..." : "Tap to start venting"}
+            {isProcessing ? "Reflecting on your words..." : isRecording ? "I'm listening..." : "Tap to speak freely"}
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          <p className={styles.disclosure}>
+            Reflective listening space. Audio is processed ephemerally and never stored.
+          </p>
+
+          {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       ) : (
+        /* 3. Reflection Result */
         <section className={styles.resultSection}>
           <div className={styles.replyCard}>
             <p className={styles.replyText}>{reply}</p>
           </div>
           
           <div className={styles.transcriptCard}>
-            <h3>What you said:</h3>
+            <h3>What you shared:</h3>
             <p>{transcript}</p>
           </div>
 
           <div className={styles.actions}>
-            <button className={styles.outlineBtn} onClick={() => router.push("/overwhelmed")}>
-              Help me break this down
+            <button 
+              type="button"
+              className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
+              onClick={handleSaveReflection}
+              disabled={saving || saved}
+            >
+              {saved ? (
+                <>
+                  <Check size={16} />
+                  <span>Saved to Reflections</span>
+                </>
+              ) : (
+                <>
+                  <Bookmark size={16} />
+                  <span>{saving ? "Saving..." : "Save privately"}</span>
+                </>
+              )}
             </button>
-            <button className={styles.textBtn} onClick={() => router.push("/")}>
-              I&apos;m done for now
+
+            <button 
+              type="button"
+              className={styles.outlineBtn} 
+              onClick={() => router.push("/overwhelmed")}
+            >
+              Help me break this into steps
+            </button>
+
+            <button 
+              type="button"
+              className={styles.textBtn} 
+              onClick={handleReset}
+            >
+              Start over
             </button>
           </div>
         </section>
