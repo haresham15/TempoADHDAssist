@@ -114,3 +114,25 @@ drop policy if exists "Allow delete own vent_logs" on public.vent_logs;
 create policy "Allow delete own vent_logs" on public.vent_logs 
   for delete 
   using (auth.uid() is not null and user_id = auth.uid());
+
+-- 9. SUGGESTIONS & FEEDBACK TABLE
+create table if not exists public.suggestions (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  user_id uuid references auth.users(id) on delete set null null,
+  category text not null default 'general',
+  content text not null,
+  contact_email text null
+);
+
+alter table public.suggestions enable row level security;
+
+drop policy if exists "Allow insert suggestions" on public.suggestions;
+create policy "Allow insert suggestions" on public.suggestions 
+  for insert 
+  with check (true);
+
+drop policy if exists "Allow select own suggestions" on public.suggestions;
+create policy "Allow select own suggestions" on public.suggestions 
+  for select 
+  using (auth.uid() is not null and user_id = auth.uid());

@@ -57,6 +57,10 @@ export default function BrandHeader() {
         </Link>
 
         <div className={styles.headerActions}>
+          <Link href="/about" className={styles.navLink} title="About Tempo &amp; FAQ">
+            About
+          </Link>
+
           <button 
             type="button" 
             className={styles.plusBadgeBtn}

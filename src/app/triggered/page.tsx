@@ -10,8 +10,7 @@ import {
   Bookmark, 
   HeartHandshake, 
   Sparkles,
-  Clipboard,
-  ShieldCheck
+  Clipboard
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -24,25 +23,6 @@ interface RsdResult {
 }
 
 const MAX_CHARS = 3000;
-
-const STARTER_SCENARIOS = [
-  {
-    label: "💬 'Can we talk?'",
-    text: "My manager sent: 'Do you have time for a quick sync later today? We need to talk.' My stomach dropped and I feel like I'm about to get fired.",
-  },
-  {
-    label: "📱 Left on read",
-    text: "They read my message 4 hours ago and didn't reply, but they're active online. I feel completely rejected and embarrassed.",
-  },
-  {
-    label: "🛑 Defensive urge",
-    text: "I want to send: 'If you actually trusted me you wouldn't micromanage every single thing I do. I am sick of being treated like I don't care!'",
-  },
-  {
-    label: "🛡️ Setting a boundary",
-    text: "A colleague asked me to take on another emergency assignment tonight. I need to politely refuse without sounding rude or apologizing profusely.",
-  },
-];
 
 export default function Triggered() {
   const router = useRouter();
@@ -223,14 +203,9 @@ export default function Triggered() {
         /* 2. Input Screen */
         <section className={styles.inputSection}>
           <form onSubmit={handleProcess} className={styles.form}>
-            <div className={styles.safeZoneBadge}>
-              <ShieldCheck size={14} className={styles.shieldIcon} />
-              <span>Private Safe Zone: Stays local on your device unless you choose to save</span>
-            </div>
-
             <div className={styles.textareaWrapper}>
               <div className={styles.textareaHeaderRow}>
-                <span className={styles.textareaHint}>What happened or what did they say?</span>
+                <span className={styles.textareaHint}>What happened or what was said?</span>
                 <button
                   type="button"
                   onClick={handlePasteClipboard}
@@ -244,7 +219,7 @@ export default function Triggered() {
               </div>
               <textarea
                 className={styles.textarea}
-                placeholder="Paste what they said, or draft what you're tempted to send in the heat of the moment..."
+                placeholder="Paste what they said, or draft what you want to send..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
                 onKeyDown={(e) => {
@@ -261,33 +236,13 @@ export default function Triggered() {
                 aria-label="Message to reframe"
               />
               <div className={styles.textareaFooterRow}>
-                <span className={styles.shortcutHint}>Tip: Press <strong>Ctrl + Enter</strong> to reframe</span>
                 <div className={styles.charCount} aria-live="polite">
                   {message.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
                 </div>
               </div>
             </div>
 
-            {/* ADHD Quick Starter Chips (Overcomes Blank Page Freeze) */}
-            {!message && (
-              <div className={styles.startersWrapper}>
-                <span className={styles.startersTitle}>Quick starters to unfreeze:</span>
-                <div className={styles.chipRow}>
-                  {STARTER_SCENARIOS.map((scenario) => (
-                    <button
-                      key={scenario.label}
-                      type="button"
-                      className={styles.starterChip}
-                      onClick={() => setMessage(scenario.text)}
-                    >
-                      {scenario.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Try It Yourself First Toggle */}
+            {/* Optional Reframe Practice */}
             <div className={styles.tryToggleRow}>
               <label className={styles.toggleLabel}>
                 <input 
@@ -297,19 +252,16 @@ export default function Triggered() {
                   className={styles.checkbox}
                 />
                 <span className={styles.toggleText}>
-                  Try reframing first (Self-Regulation Practice)
+                  Draft my own reframe first
                 </span>
               </label>
             </div>
 
             {tryFirst && (
               <div className={styles.userDraftWrapper}>
-                <label className={styles.draftLabel}>
-                  Before seeing the AI reframe, how would you phrase this with calm boundaries?
-                </label>
                 <textarea
                   className={styles.userDraftTextarea}
-                  placeholder="Your calm draft..."
+                  placeholder="Type your calm draft here..."
                   value={userDraft}
                   onChange={(e) => setUserDraft(e.target.value)}
                   disabled={loading}
@@ -317,21 +269,13 @@ export default function Triggered() {
                 />
               </div>
             )}
-
-            <p className={styles.disclosure}>
-              This is an AI communication coach, not a therapist. Nothing is saved unless you explicitly tap &ldquo;Save privately&rdquo;.
-            </p>
             
             <button 
               type="submit" 
               className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
               disabled={loading || !message.trim()}
             >
-              {loading 
-                ? "Taking a breath with this..." 
-                : tryFirst 
-                  ? "Compare my reframe with AI" 
-                  : "Help me see this clearly"}
+              {loading ? "Reframing..." : "Reframe"}
             </button>
           </form>
           {error && <div className={styles.error} role="alert">{error}</div>}

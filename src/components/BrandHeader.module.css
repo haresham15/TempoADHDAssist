@@ -48,6 +48,21 @@
   gap: 0.75rem;
 }
 
+.navLink {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  transition: all 0.2s var(--easing);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
 .plusBadgeBtn {
   display: flex;
   align-items: center;

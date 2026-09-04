@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { TempoProvider } from "@/lib/TempoContext";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body>
         <TempoProvider>
           {children}
+          <Footer />
           <Navigation />
         </TempoProvider>
       </body>

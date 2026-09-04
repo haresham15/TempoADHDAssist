@@ -101,7 +101,7 @@ export default function Home() {
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.flagshipBadge}>
-              <Sparkles size={12} strokeWidth={2.5} /> Flagship Buffer
+              <Sparkles size={12} strokeWidth={2.5} /> Communication Buffer
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~30 sec
@@ -113,7 +113,7 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I&apos;m triggered</h2>
-              <p>Pause, name the thinking pattern &amp; find calm words</p>
+              <p>Pause, reframe reactive messages &amp; find calm words</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>
@@ -124,11 +124,11 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardOverwhelm}`}
           onClick={() => router.push('/overwhelmed')}
-          aria-label="Task Chunker - Break down tasks into zero-friction micro-actions. Takes about 2 minutes."
+          aria-label="Task Chunker - Break down tasks into small micro-steps. Takes about 2 minutes."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeSage}>
-              <Zap size={11} strokeWidth={2.5} /> Energy-Adaptive
+              <Zap size={11} strokeWidth={2.5} /> Task Chunker
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~2 min
@@ -140,7 +140,7 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I&apos;m overwhelmed</h2>
-              <p>Zero-friction micro-actions tailored for ADHD executive function</p>
+              <p>Break daunting tasks into small, manageable micro-steps</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>
@@ -151,11 +151,11 @@ export default function Home() {
           type="button"
           className={`${styles.intentCard} ${styles.cardVent}`}
           onClick={() => router.push('/vent')}
-          aria-label="Voice Journal - Speak freely into a judgment-free reflective audio space. Takes about 60 seconds."
+          aria-label="Sensory Vent - Speak or write freely in a private space. Takes about 60 seconds."
         >
           <div className={styles.cardHeaderRow}>
             <span className={styles.featureBadgeBlush}>
-              <Mic size={11} strokeWidth={2.5} /> Reflective Listening
+              <Mic size={11} strokeWidth={2.5} /> Sensory Vent
             </span>
             <span className={styles.timeBadge}>
               <Clock size={11} strokeWidth={2} /> ~60 sec
@@ -167,7 +167,7 @@ export default function Home() {
             </div>
             <div className={styles.cardContent}>
               <h2>I need to vent</h2>
-              <p>Speak freely into a judgment-free reflective audio space</p>
+              <p>Speak or write freely in a quiet, private space</p>
             </div>
             <ChevronRight size={18} className={styles.cardArrow} />
           </div>

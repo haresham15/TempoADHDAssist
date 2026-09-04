@@ -6,12 +6,6 @@ import { useTempo } from "@/lib/TempoContext";
 import { ArrowLeft, Check, HeartHandshake, Zap, Bookmark } from "lucide-react";
 import styles from "./page.module.css";
 
-const TASK_STARTERS = [
-  "🧹 Clear desk / organize room",
-  "📧 Reply to that overdue email",
-  "📝 Start work or study project",
-  "🎒 Pack and prep for tomorrow",
-];
 
 export default function Overwhelmed() {
   const router = useRouter();
@@ -187,15 +181,15 @@ export default function Overwhelmed() {
         /* 2. Task Input View */
         <section className={styles.inputSection}>
           <div className={styles.introHeading}>
-            <h1>Low-Friction Task Chunker</h1>
-            <p>Break daunting tasks into zero-friction micro-actions tailored for ADHD executive function.</p>
+            <h1>Task Chunker</h1>
+            <p>Break any daunting task into small, manageable micro-steps.</p>
           </div>
 
           <form onSubmit={handleChunkTask} className={styles.inputWrapper}>
             <input
               type="text"
               className={styles.input}
-              placeholder="What's the one thing on your mind?"
+              placeholder="What task is overwhelming you right now?"
               value={task}
               onChange={(e) => setTask(e.target.value)}
               disabled={loading}
@@ -211,23 +205,6 @@ export default function Overwhelmed() {
             </button>
           </form>
 
-          {/* Quick Starters to bypass blank-page freeze */}
-          <div className={styles.startersWrapper}>
-            <span className={styles.startersTitle}>Common ADHD Task Starters:</span>
-            <div className={styles.starterChipsRow}>
-              {TASK_STARTERS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={styles.starterChip}
-                  onClick={() => setTask(s.replace(/^[^\w\s]+\s*/, ""))}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
       ) : !allCompleted ? (
@@ -236,7 +213,7 @@ export default function Overwhelmed() {
           <div className={styles.stepsHeader}>
             <div className={styles.stepsHeaderLeft}>
               <span className={styles.energyBadge}>
-                <Zap size={13} /> {energyLevel} Energy Required
+                <Zap size={13} /> {energyLevel} Energy
               </span>
               <button
                 type="button"

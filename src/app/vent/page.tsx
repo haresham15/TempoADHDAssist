@@ -297,14 +297,14 @@ export default function Vent() {
               className={`${styles.tabBtn} ${inputMode === "voice" ? styles.tabActive : ""}`}
               onClick={() => setInputMode("voice")}
             >
-              <Mic size={14} /> Spoken Voice
+              <Mic size={14} /> Voice
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${inputMode === "text" ? styles.tabActive : ""}`}
               onClick={() => setInputMode("text")}
             >
-              ✍️ Write Instead
+              Write
             </button>
           </div>
 
@@ -342,7 +342,7 @@ export default function Vent() {
               )}
 
               <div className={styles.statusText}>
-                {isProcessing ? "Reflecting on your words..." : isRecording ? "I'm listening... speak freely" : "Tap the mic to speak freely"}
+                {isProcessing ? "Reflecting on your words..." : isRecording ? "I'm listening..." : "Tap to speak freely"}
               </div>
             </>
           ) : (
@@ -350,7 +350,7 @@ export default function Vent() {
             <form onSubmit={handleProcessWritten} className={styles.textVentForm}>
               <textarea
                 className={styles.textVentArea}
-                placeholder="Let it all out here... What is spinning in your mind or overwhelming you right now? No filter needed."
+                placeholder="What is spinning in your mind right now? Let it out..."
                 value={writtenText}
                 onChange={(e) => setWrittenText(e.target.value)}
                 disabled={isProcessing}
@@ -363,14 +363,10 @@ export default function Vent() {
                 className={styles.textVentSubmitBtn}
                 disabled={isProcessing || !writtenText.trim()}
               >
-                {isProcessing ? "Reflecting on your words..." : "Reflect with me"}
+                {isProcessing ? "Reflecting..." : "Reflect"}
               </button>
             </form>
           )}
-
-          <p className={styles.disclosure}>
-            Judgment-free reflective listening space. Thoughts are processed ephemerally and never stored unless you choose to save.
-          </p>
 
           {error && <div className={styles.error} role="alert">{error}</div>}
         </section>
