@@ -3,7 +3,9 @@
 The single source of truth for Tempo's UI architecture, comforting typography, signature color palette, and neurodivergent-friendly interaction design.
 
 ## 1. Core Philosophy: Low-Stim Sensory Comfort
+
 Designed specifically for ADHD, Rejection Sensitive Dysphoria (RSD), and executive freeze.
+
 - **Warm, low-glare canvas**: Warm Ivory and Soft Linen instead of harsh stark white or clinical gray.
 - **Comforting typography**: Feather-light, rounded geometric `Outfit` sans-serif paired with warm, gentle `Lora` editorial touches. Zero harsh, sharp, spiky serifs or brutalist monospace HUDs.
 - **Emotional color-coding**: Functional pastel and earth tones mapped to user sensory states:
