@@ -1,6 +1,7 @@
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
-const RATE_LIMIT = 10; // requests
+const isDev = process.env.NODE_ENV === "development";
+const RATE_LIMIT = isDev ? 120 : 15; // requests per minute
 const WINDOW_MS = 60 * 1000; // per minute
 const MAX_MAP_SIZE = 1000;
 

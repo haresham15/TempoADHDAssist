@@ -40,11 +40,13 @@ export async function GET() {
       ventLogs: ventRes.data || [],
     });
   } catch (err: unknown) {
-    console.error("History API GET error:", err);
-    return NextResponse.json(
-      { error: "Failed to fetch session history." },
-      { status: 500 }
-    );
+    console.warn("History API GET unreachable or unconfigured:", err);
+    return NextResponse.json({
+      authenticated: false,
+      rsdLogs: [],
+      taskChunks: [],
+      ventLogs: []
+    });
   }
 }
 

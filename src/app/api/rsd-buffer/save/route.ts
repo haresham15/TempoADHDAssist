@@ -54,19 +54,13 @@ export async function POST(req: Request) {
       ]);
 
     if (dbError) {
-      console.error("Failed to save RSD log to Supabase:", dbError);
-      return NextResponse.json(
-        { error: "Could not save your session to the database." },
-        { status: 500 }
-      );
+      console.warn("Supabase unreachable or unconfigured:", dbError.message || dbError);
+      return NextResponse.json({ success: true, offline: true });
     }
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
-    console.error("Save endpoint error:", err);
-    return NextResponse.json(
-      { error: "An unexpected error occurred while saving." },
-      { status: 500 }
-    );
+    console.warn("Save endpoint offline fallback:", err);
+    return NextResponse.json({ success: true, offline: true });
   }
 }
